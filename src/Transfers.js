@@ -14,7 +14,7 @@ function Transfers({ branchId, onChange }) {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetch(API + '/branches/get_branches.php')
+    fetch(API + '/branches/get_branches.php', { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
         if (result.success) {
@@ -31,7 +31,7 @@ function Transfers({ branchId, onChange }) {
 
   const loadProducts = useCallback(() => {
     if (!fromBranch) return;
-    fetch(API + '/products/get_products.php?branch_id=' + fromBranch)
+    fetch(API + '/products/get_products.php?branch_id=' + fromBranch, { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
         if (result.success) setProducts(result.data);
@@ -46,7 +46,7 @@ function Transfers({ branchId, onChange }) {
 
   const loadTransfers = useCallback(() => {
     const query = branchId === 'all' ? '' : '?branch_id=' + branchId;
-    fetch(API + '/stock/get_transfers.php' + query)
+    fetch(API + '/stock/get_transfers.php' + query, { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
         if (result.success) setTransfers(result.data);
@@ -93,6 +93,7 @@ function Transfers({ branchId, onChange }) {
     setSubmitting(true);
     try {
       const res = await fetch(API + '/stock/transfer_stock.php', {
+        credentials: 'include',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

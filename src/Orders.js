@@ -12,7 +12,7 @@ function Orders({ branchId }) {
   const loadOrders = useCallback(() => {
     const query = branchId === 'all' ? '' : '?branch_id=' + branchId;
     setLoading(true);
-    fetch(API + '/orders/get_orders.php' + query)
+    fetch(API + '/orders/get_orders.php' + query, { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
         if (result.success) setOrders(result.data);
@@ -40,6 +40,7 @@ function Orders({ branchId }) {
     }
 
     fetch(API + '/orders/update_order_status.php', {
+      credentials: 'include',
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ order_id: order.order_id, status: newStatus })

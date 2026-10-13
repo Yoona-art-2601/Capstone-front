@@ -4,6 +4,7 @@ import Orders from './Orders';
 import Inventory from './Inventory';
 import Transfers from './Transfers'
 import Dashboard from './Dashboard';
+import Login from './Login';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -15,6 +16,30 @@ const TABS = [
 ];
 
 function Admin() {
+  const [user, setUser] = useState(null);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    fetch(API + '/auth/me.php', { credentials: 'include' })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && result.user.role === 'Admin') setUser(result.user);
+      })
+      .catch(err => console.error('Error checking login:', err))
+      .finally(() => setChecking(false));
+  }, []);
+
+  const handleLogout = () => {
+    fetch(API + '/auth/logout.php', { credentials: 'include' })
+      .finally(() => setUser(null));
+  };
+
+  if (checking) return <div className="login-page">Loading...</div>;
+  if (!user) return <Login onLogin={setUser} />;
+  return <AdminPanel user={user} onLogout={handleLogout} />;
+}
+
+function AdminPanel({ user, onLogout }) {
   const [tab, setTab] = useState('orders');
   const [branches, setBranches] = useState([]);
   const [branchId, setBranchId] = useState('all');
@@ -22,7 +47,7 @@ function Admin() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    fetch(API + '/branches/get_branches.php')
+    fetch(API + '/branches/get_branches.php', { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
         if (result.success) setBranches(result.data);
@@ -33,7 +58,7 @@ function Admin() {
   // low-stock count shown on the Inventory tab
   useEffect(() => {
     const query = branchId === 'all' ? '' : '?branch_id=' + branchId;
-    fetch(API + '/stock/get_low_stock.php' + query)
+    fetch(API + '/stock/get_low_stock.php' + query, { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
         if (result.success) setLowStockCount(result.data.length);
@@ -59,6 +84,8 @@ function Admin() {
             </select>
           </label>
           <a href="/" className="admin-link">&larr; Back to store</a>
+          <span className="admin-user">{user.name}</span>
+          <button className="logout-btn" onClick={onLogout}>Logout</button>
         </div>
       </header>
 

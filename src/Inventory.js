@@ -4,6 +4,7 @@ const API = 'http://localhost/beaconmart-project/backend';
 
 function post(path, body) {
   return fetch(API + path, {
+    credentials: 'include',
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
@@ -170,7 +171,7 @@ function Inventory({ branchId, onChange }) {
   const loadProducts = useCallback((showSpinner = true) => {
     if (branchId === 'all') return;
     if (showSpinner) setLoading(true);
-    fetch(API + '/products/get_products.php?branch_id=' + branchId)
+    fetch(API + '/products/get_products.php?branch_id=' + branchId, { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
         if (result.success) setProducts(result.data);

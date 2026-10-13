@@ -8,7 +8,7 @@ const API = 'http://localhost/beaconmart-project/backend';
 const rm = (value) => 'RM ' + Number(value).toFixed(2);
 
 function getJSON(path) {
-  return fetch(API + path).then(res => res.json());
+  return fetch(API + path, { credentials: 'include' }).then(res => res.json());
 }
 
 function BarChart({ labels, values, label, color }) {
