@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import CustomerAuth from './CustomerAuth';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -12,6 +13,36 @@ function Store() {
   const [customerPhone, setCustomerPhone] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [user, setUser] = useState(null);
+  const [showAuth, setShowAuth] = useState(false);
+
+  useEffect(() => {
+    fetch(API + '/auth/me.php', { credentials: 'include' })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          setUser(result.user);
+          setCustomerName(result.user.name);
+        }
+      })
+      .catch(err => console.error('Error checking login:', err));
+  }, []);
+
+  const handleLogin = (loggedInUser) => {
+    setUser(loggedInUser);
+    setCustomerName(loggedInUser.name);
+    setShowAuth(false);
+    setMessage('Welcome, ' + loggedInUser.name + '!');
+  };
+
+  const handleLogout = () => {
+    fetch(API + '/auth/logout.php', { credentials: 'include' })
+      .finally(() => {
+        setUser(null);
+        setCustomerName('');
+        setMessage('You have logged out.');
+      });
+  };
 
   // after payment redirect, show success or cancelled message
   useEffect(() => {
@@ -87,6 +118,7 @@ function Store() {
     setMessage('');
 
     fetch(API + '/payment/create_checkout_session.php', {
+      credentials: 'include',
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -118,7 +150,21 @@ function Store() {
 
   return (
     <div className="App" style={{ padding: '20px' }}>
-      <h1>Beacon Mart</h1>
+      <div className="store-header">
+        <h1>Beacon Mart</h1>
+        <div className="store-user">
+          {user ? (
+            <>
+              <span>Hi, {user.name}</span>
+              <button onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <button onClick={() => setShowAuth(true)}>Login / Register</button>
+          )}
+        </div>
+      </div>
+
+      {showAuth && <CustomerAuth onLogin={handleLogin} onClose={() => setShowAuth(false)} />}
 
       <div style={{ marginBottom: '20px' }}>
         <label><strong>Select branch: </strong></label>
