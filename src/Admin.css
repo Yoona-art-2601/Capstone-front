@@ -73,3 +73,5 @@ button.danger { color: #dc3545; }
 .login-box button:disabled { opacity: 0.6; }
 .login-box .notice { margin-bottom: 0; }
 .login-back { color: #6772e5; text-decoration: none; text-align: center; font-size: 14px; }
+
+.admin-table .address { color: #555; white-space: pre-line; }

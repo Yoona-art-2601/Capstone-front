@@ -11,6 +11,7 @@ function Store() {
   const [cart, setCart] = useState([]);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
+  const [customerAddress, setCustomerAddress] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState(null);
@@ -109,6 +110,14 @@ function Store() {
       setMessage('Please enter your name.');
       return;
     }
+    if (!customerPhone.trim()) {
+      setMessage('Please enter your phone number.');
+      return;
+    }
+    if (!customerAddress.trim()) {
+      setMessage('Please enter your delivery address.');
+      return;
+    }
     if (cart.length === 0) {
       setMessage('Your cart is empty.');
       return;
@@ -125,6 +134,7 @@ function Store() {
         branch_id: branchId,
         customer_name: customerName,
         customer_phone: customerPhone,
+        customer_address: customerAddress,
         items: cart.map(item => ({
           product_id: item.product_id,
           quantity: item.quantity
@@ -156,6 +166,7 @@ function Store() {
           {user ? (
             <>
               <span>Hi, {user.name}</span>
+              <a href="/my-orders" className="store-link">My Orders</a>
               <button onClick={handleLogout}>Logout</button>
             </>
           ) : (
@@ -223,6 +234,11 @@ function Store() {
                 type="text" placeholder="Phone Number" value={customerPhone}
                 onChange={(e) => setCustomerPhone(e.target.value)}
                 style={{ display: 'block', marginBottom: '8px', width: '100%' }}
+              />
+              <textarea
+                placeholder="Delivery Address" value={customerAddress} rows={3}
+                onChange={(e) => setCustomerAddress(e.target.value)}
+                style={{ display: 'block', marginBottom: '8px', width: '100%', boxSizing: 'border-box', fontFamily: 'inherit' }}
               />
               <button onClick={handleCheckout} disabled={submitting}>
                 {submitting ? 'Redirecting to payment...' : 'Pay with Stripe'}

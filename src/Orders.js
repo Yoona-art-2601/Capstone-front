@@ -113,6 +113,12 @@ function Orders({ branchId }) {
                   {order.customer_name}
                   <br />
                   <small>{order.customer_phone}</small>
+                  {order.customer_address && (
+                    <>
+                      <br />
+                      <small className="address">{order.customer_address}</small>
+                    </>
+                  )}
                 </td>
                 <td>{order.branch_name || '-'}</td>
                 <td>

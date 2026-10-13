@@ -53,3 +53,20 @@
 .auth-submit { background: #6772e5; color: white; border: none; border-radius: 4px; padding: 10px; font-size: 15px; cursor: pointer; }
 .auth-submit:disabled { opacity: 0.6; }
 .auth-cancel { background: none; border: none; color: #666; cursor: pointer; }
+
+.store-link { color: #6772e5; text-decoration: none; }
+
+.my-orders { max-width: 720px; margin: 0 auto; padding: 20px; text-align: left; font-family: Arial, sans-serif; }
+.order-card { border: 1px solid #ddd; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; background: white; }
+.order-card-head { display: flex; justify-content: space-between; align-items: center; }
+.order-meta { color: #666; font-size: 14px; margin: 6px 0; }
+.order-items { width: 100%; border-collapse: collapse; margin: 10px 0; }
+.order-items td { padding: 6px 0; border-bottom: 1px solid #eee; }
+.order-items .num { text-align: right; }
+.order-items .order-total td { font-weight: bold; border-bottom: none; }
+.order-status { padding: 3px 12px; border-radius: 12px; font-size: 13px; font-weight: bold; background: #e2e3e5; color: #383d41; }
+.order-status.pending { background: #fff3cd; color: #856404; }
+.order-status.processing { background: #cce5ff; color: #004085; }
+.order-status.completed { background: #d4edda; color: #155724; }
+.order-status.cancelled { background: #f8d7da; color: #721c24; }
+.order-status.unpaid { background: #e2e3e5; color: #383d41; }
