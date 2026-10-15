@@ -5,6 +5,7 @@ import Inventory from './Inventory';
 import Transfers from './Transfers'
 import Dashboard from './Dashboard';
 import Login from './Login';
+import AuditTrail from './AuditTrail';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -13,6 +14,7 @@ const TABS = [
   { key: 'inventory', label: 'Inventory' },
   { key: 'transfers', label: 'Stock Transfers' },
   { key: 'dashboard', label: 'Dashboard' },
+  { key: 'audit', label: 'Audit Trail' },
 ];
 
 function Admin() {
@@ -113,6 +115,7 @@ function AdminPanel({ user, onLogout }) {
           <Transfers branchId={branchId} onChange={() => setRefreshKey(k => k + 1)} />
         )}
         {tab === 'dashboard' && <Dashboard branchId={branchId} />}
+        {tab === 'audit' && <AuditTrail />}
       </main>
     </div>
   );

@@ -75,3 +75,14 @@ button.danger { color: #dc3545; }
 .login-back { color: #6772e5; text-decoration: none; text-align: center; font-size: 14px; }
 
 .admin-table .address { color: #555; white-space: pre-line; }
+
+.audit-toolbar { flex-wrap: wrap; }
+.audit-toolbar input, .audit-toolbar select { padding: 4px 8px; }
+.admin-table td.nowrap { white-space: nowrap; }
+.pill.audit { background: #e2e3e5; color: #383d41; white-space: nowrap; }
+.pill.audit.login { background: #cce5ff; color: #004085; }
+.pill.audit.danger { background: #f8d7da; color: #721c24; }
+.pill.audit.order { background: #fff3cd; color: #856404; }
+.pill.audit.stock { background: #d4edda; color: #155724; }
+.pill.audit.product { background: #e8dff5; color: #4b2c7f; }
+.pager { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 16px; }
