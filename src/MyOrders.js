@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { categoryIcon } from './store';
+import { productIcon } from './store';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -74,7 +74,7 @@ function MyOrders() {
                 <tbody>
                   {order.items.map((item, i) => (
                     <tr key={i}>
-                      <td>{categoryIcon(item.category)} {item.name} &times; {item.quantity}</td>
+                      <td>{productIcon(item)} {item.name} &times; {item.quantity}</td>
                       <td className="num">RM {Number(item.subtotal).toFixed(2)}</td>
                     </tr>
                   ))}

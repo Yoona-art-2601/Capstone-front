@@ -8,13 +8,26 @@ const CATEGORY_ICONS = [
   ['chicken', '🍗'], ['meat', '🥩'], ['seafood', '🐟'], ['fish', '🐟'],
   ['dried', '🌾'], ['rice', '🌾'], ['grain', '🌾'], ['vegetable', '🥬'],
   ['fruit', '🍎'], ['dairy', '🥛'], ['milk', '🥛'], ['egg', '🥚'],
-  ['drink', '🧃'], ['beverage', '🧃'], ['snack', '🥜'], ['nut', '🥜'], ['honey', '🍯'],
+  ['drink', '🧃'], ['beverage', '🧃'], ['coffee', '☕'], ['snack', '🥜'], ['nut', '🥜'],
+  ['honey', '🍯'], ['health', '🍯'], ['wellness', '🍯'], ['ready', '🍳'], ['pantry', '🧂'], ['sauce', '🧂'],
+];
+
+const NAME_ICONS = [
+  ['coffee', '☕'], ['juice', '🧃'], ['prawn', '🦐'], ['sausage', '🌭'], ['nugget', '🍗'],
+  ['honey', '🍯'], ['essence', '🍵'], ['bird nest', '🥣'], ['shoyu', '🧂'], ['rice', '🌾'],
+  ['salmon', '🐟'], ['mackerel', '🐟'], ['fish', '🐟'],
 ];
 
 export function categoryIcon(category) {
   const c = (category || '').toLowerCase();
   const match = CATEGORY_ICONS.find(([key]) => c.includes(key));
   return match ? match[1] : '🛒';
+}
+
+export function productIcon(product) {
+  const n = (product.name || '').toLowerCase();
+  const match = NAME_ICONS.find(([key]) => n.includes(key));
+  return match ? match[1] : categoryIcon(product.category);
 }
 
 const rm = (value) => 'RM ' + Number(value).toFixed(2);
@@ -107,14 +120,16 @@ function Store() {
   }, [branchId]);
 
   const categories = useMemo(
-    () => ['All', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))],
+    () => ['All', ...Array.from(new Set(products.map(p => p.category).filter(Boolean))).sort()],
     [products]
   );
 
-  const visibleProducts = products.filter(p =>
-    (category === 'All' || p.category === category) &&
-    p.name.toLowerCase().includes(search.trim().toLowerCase())
-  );
+  const visibleProducts = products
+    .filter(p =>
+      (category === 'All' || p.category === category) &&
+      p.name.toLowerCase().includes(search.trim().toLowerCase())
+    )
+    .sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
 
   const branchName = (branches.find(b => b.branch_id === branchId) || {}).branch_name || '';
 
@@ -296,7 +311,7 @@ function Store() {
                 return (
                   <div key={product.product_id} className="product-card">
                     <div className="product-image">
-                      <span>{categoryIcon(product.category)}</span>
+                      <span>{productIcon(product)}</span>
                       <span className={'stock-badge ' + badge.cls}>{badge.text}</span>
                     </div>
                     <div className="product-info">
@@ -335,7 +350,7 @@ function Store() {
               <ul className="cart-items">
                 {cart.map(item => (
                   <li key={item.product_id}>
-                    <span className="cart-icon">{categoryIcon(item.category)}</span>
+                    <span className="cart-icon">{productIcon(item)}</span>
                     <div className="cart-item-info">
                       <strong>{item.name}</strong>
                       <small>{rm(item.price)} each</small>
