@@ -190,6 +190,69 @@ function Store() {
     return item ? item.quantity : 0;
   };
 
+  const showCollections = category === 'All' && !search.trim();
+
+  const collections = [
+    {
+      key: 'promo',
+      title: 'Monthly Promotions',
+      chip: PROMOTIONS,
+      items: products.filter(p => p.on_sale).sort((a, b) => b.discount_percent - a.discount_percent).slice(0, 4)
+    },
+    {
+      key: 'best',
+      title: 'Best Sellers',
+      items: products.filter(p => Number(p.sold) > 0).sort((a, b) => Number(b.sold) - Number(a.sold)).slice(0, 4)
+    },
+    {
+      key: 'new',
+      title: 'New Arrivals',
+      items: [...products].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || '') || b.product_id - a.product_id).slice(0, 4)
+    }
+  ].filter(col => col.items.length > 0);
+
+  const renderCard = (product) => {
+    const badge = stockBadge(product.stock);
+    const inCart = cart.find(item => item.product_id === product.product_id);
+    return (
+      <div key={product.product_id} className="product-card">
+        <div
+          className="product-image clickable"
+          onClick={() => setDetailProduct(product)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => { if (e.key === 'Enter') setDetailProduct(product); }}
+          aria-label={'View details of ' + product.name}
+        >
+          {productImageUrl(product)
+            ? <img src={productImageUrl(product)} alt={product.name} loading="lazy" />
+            : <span>{productIcon(product)}</span>}
+          <span className={'stock-badge ' + badge.cls}>{badge.text}</span>
+          {product.on_sale && <span className="sale-badge">-{product.discount_percent}%</span>}
+        </div>
+        <div className="product-info">
+          <span className="product-category">{product.category}</span>
+          <h3 className="clickable" onClick={() => setDetailProduct(product)}>{product.name}</h3>
+          <div className="product-bottom">
+            <span className="price-block">
+              <span className={'price' + (product.on_sale ? ' sale' : '')}>{rm(product.unit_price)}</span>
+              {product.on_sale && <span className="price-old">{rm(product.price)}</span>}
+            </span>
+            <button
+              className="btn btn-primary"
+              onClick={() => addToCart(product)}
+              disabled={product.stock <= 0}
+            >
+              {product.stock <= 0 ? 'Sold out' : inCart ? 'Add more' : 'Add to cart'}
+            </button>
+          </div>
+          {Number(product.sold) > 0 && <span className="sold-count">{product.sold} sold</span>}
+          {inCart && <span className="in-cart">✓ {inCart.quantity} in cart</span>}
+        </div>
+      </div>
+    );
+  };
+
   const changeQty = (productId, delta) => {
     setCart(cart
       .map(item => {
@@ -360,48 +423,25 @@ function Store() {
           ) : visibleProducts.length === 0 ? (
             <p className="empty">No products found.</p>
           ) : (
-            <div className="product-grid">
-              {visibleProducts.map(product => {
-                const badge = stockBadge(product.stock);
-                const inCart = cart.find(item => item.product_id === product.product_id);
-                return (
-                  <div key={product.product_id} className="product-card">
-                    <div
-                      className="product-image clickable"
-                      onClick={() => setDetailProduct(product)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => { if (e.key === 'Enter') setDetailProduct(product); }}
-                      aria-label={'View details of ' + product.name}
-                    >
-                      {productImageUrl(product)
-                        ? <img src={productImageUrl(product)} alt={product.name} loading="lazy" />
-                        : <span>{productIcon(product)}</span>}
-                      <span className={'stock-badge ' + badge.cls}>{badge.text}</span>
-                      {product.on_sale && <span className="sale-badge">-{product.discount_percent}%</span>}
-                    </div>
-                    <div className="product-info">
-                      <span className="product-category">{product.category}</span>
-                      <h3 className="clickable" onClick={() => setDetailProduct(product)}>{product.name}</h3>
-                      <div className="product-bottom">
-                        <span className="price-block">
-                          <span className={'price' + (product.on_sale ? ' sale' : '')}>{rm(product.unit_price)}</span>
-                          {product.on_sale && <span className="price-old">{rm(product.price)}</span>}
-                        </span>
-                        <button
-                          className="btn btn-primary"
-                          onClick={() => addToCart(product)}
-                          disabled={product.stock <= 0}
-                        >
-                          {product.stock <= 0 ? 'Sold out' : inCart ? 'Add more' : 'Add to cart'}
-                        </button>
-                      </div>
-                      {inCart && <span className="in-cart">✓ {inCart.quantity} in cart</span>}
-                    </div>
+            <>
+              {showCollections && collections.map(col => (
+                <section key={col.key} className="collection">
+                  <div className="collection-head">
+                    <h2>{col.title}</h2>
+                    {col.chip && (
+                      <button className="link-button" onClick={() => setCategory(col.chip)}>See all</button>
+                    )}
                   </div>
-                );
-              })}
-            </div>
+                  <div className="product-grid">{col.items.map(renderCard)}</div>
+                </section>
+              ))}
+              <section className="collection">
+                {showCollections && (
+                  <div className="collection-head"><h2>All products</h2></div>
+                )}
+                <div className="product-grid">{visibleProducts.map(renderCard)}</div>
+              </section>
+            </>
           )}
         </main>
 
