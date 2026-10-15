@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import './App.css';
+import { productIcon } from './store';
 import { PageShell } from './Layout';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
-const rm = (value) => 'RM ' + Number(value).toFixed(2);
-
 function statusLabel(order) {
   if (order.status === 'Cancelled') return { text: 'Cancelled', cls: 'cancelled' };
-  if (order.payment_status !== 'Paid') return { text: 'Awaiting payment', cls: 'unpaid' };
+  if (order.payment_status !== 'Paid') return { text: 'Awaiting Payment', cls: 'unpaid' };
   return { text: order.status, cls: order.status.toLowerCase() };
 }
 
@@ -30,57 +29,62 @@ function MyOrders() {
           setError(result.message);
         }
       })
-      .catch(() => setError('Cannot connect to the server.'))
+      .catch(() => setError('Cannot connect to server.'))
       .finally(() => setLoading(false));
   }, []);
 
   return (
     <PageShell>
-      <h1 className="page-title" data-reveal>My orders</h1>
+      <div className="my-orders">
+        <h1>My Orders</h1>
 
-      {loading && <p className="page-lead">Loading your orders…</p>}
-      {error && <p className="form-error">{error}</p>}
-      {!loading && !loggedIn && (
-        <p className="page-lead">Log in on the <a href="/">shop page</a> to see your orders.</p>
-      )}
-      {!loading && loggedIn && !error && orders.length === 0 && (
-        <p className="page-lead">No orders yet. <a href="/">The shelves are this way.</a></p>
-      )}
+        {loading && <p className="message">Loading...</p>}
+        {error && <p className="auth-error">{error}</p>}
+        {!loading && !loggedIn && (
+          <p className="message">Please <a href="/">login on the store page</a> to see your orders.</p>
+        )}
+        {!loading && loggedIn && !error && orders.length === 0 && (
+          <p className="message">You have no orders yet. <a href="/">Start shopping</a></p>
+        )}
 
-      <div className="order-list">
         {orders.map(order => {
           const status = statusLabel(order);
           return (
-            <article key={order.order_id} className="order" data-reveal>
-              <div className="order-head">
-                <h2>Order {order.order_id}</h2>
+            <div key={order.order_id} className="order-card">
+              <div className="order-card-head">
+                <strong>Order #{order.order_id}</strong>
                 <span className={'order-status ' + status.cls}>{status.text}</span>
               </div>
-              <p className="order-meta">Placed {order.order_date} at {order.branch_name || 'an unassigned branch'}.</p>
-              <table className="order-lines">
+              <div className="order-meta">
+                {order.order_date} &middot; 📍 {order.branch_name || '-'}
+              </div>
+              <table className="order-items">
                 <tbody>
                   {order.items.map((item, i) => (
                     <tr key={i}>
-                      <td>{item.name} × {item.quantity}</td>
-                      <td>{rm(item.subtotal)}</td>
+                      <td>{productIcon(item)} {item.name} &times; {item.quantity}</td>
+                      <td className="num">RM {Number(item.subtotal).toFixed(2)}</td>
                     </tr>
                   ))}
                   <tr className="order-sub">
                     <td>Delivery</td>
-                    <td>{Number(order.delivery_fee) > 0 ? rm(order.delivery_fee) : 'Free'}</td>
+                    <td className="num">
+                      {Number(order.delivery_fee) > 0 ? 'RM ' + Number(order.delivery_fee).toFixed(2) : 'FREE'}
+                    </td>
                   </tr>
                   <tr className="order-total">
                     <td>Total</td>
-                    <td>{rm(order.total_amount)}</td>
+                    <td className="num">RM {Number(order.total_amount).toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
               {order.customer_address && (
-                <p className="order-delivery">
-                  Delivering to {order.customer_name}, {order.customer_phone}, {order.customer_address}
-                </p>
+                <div className="order-delivery">
+                  🚚 <strong>{order.customer_name}</strong>, {order.customer_phone}<br />
+                  {order.customer_address}
+                </div>
               )}
-            </article>
+            </div>
           );
         })}
       </div>

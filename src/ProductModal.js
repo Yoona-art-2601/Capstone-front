@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
-const rm = (value) => 'RM ' + Number(value).toFixed(2);
+const rm = (value) => 'RM ' + Number(value).toFixed(2);
 
 export function productImageUrl(product) {
-  return product && product.image_url ? API + '/' + product.image_url : null;
+  return product.image_url ? API + '/' + product.image_url : null;
 }
 
-function ProductModal({ product, branch, inCartQty, onAdd, onClose }) {
+function ProductModal({ product, icon, inCartQty, onAdd, onClose }) {
   const [qty, setQty] = useState(1);
   const maxQty = Math.max(0, product.stock - inCartQty);
   const image = productImageUrl(product);
@@ -25,39 +25,41 @@ function ProductModal({ product, branch, inCartQty, onAdd, onClose }) {
   };
 
   return (
-    <div className="dialog-layer" onClick={onClose}>
-      <div className="product-dialog" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label={product.name}>
-        <div className="product-dialog-image">
-          {image && <img src={image} alt={product.name} width="640" height="640" />}
+    <div className="auth-overlay" onClick={onClose}>
+      <div className="product-modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-label={product.name}>
+        <button className="modal-close" onClick={onClose} aria-label="Close">×</button>
+        <div className="modal-image">
+          {image ? <img src={image} alt={product.name} /> : <span>{icon}</span>}
+          {product.on_sale && <span className="sale-badge">-{product.discount_percent}%</span>}
         </div>
-        <div className="product-dialog-body">
-          <button className="dialog-close text-button" onClick={onClose}>Close</button>
-          <p className="product-dialog-cat">{product.category}</p>
+        <div className="modal-body">
+          <span className="product-category">{product.category}</span>
           <h2>{product.name}</h2>
-          <p className="product-dialog-price">
-            {rm(product.unit_price)}
-            {product.on_sale && <s>{rm(product.price)}</s>}
-          </p>
-          <p className="product-dialog-stock">
-            {product.stock > 0 ? product.stock + ' on the shelf at ' + branch + '.' : 'Sold out at ' + branch + '.'}
-            {Number(product.sold) > 0 && <> {product.sold} sold so far.</>}
-            {product.on_sale && <> {product.discount_percent}% off this month.</>}
-          </p>
-          {product.description && <p className="product-dialog-desc">{product.description}</p>}
+          <div className="modal-meta">
+            {Number(product.sold) > 0 && <span>{product.sold} sold</span>}
+            <span className={product.stock > 0 ? 'in' : 'out'}>
+              {product.stock > 0 ? product.stock + ' in stock at this branch' : 'Out of stock at this branch'}
+            </span>
+          </div>
+          <div className="price-block modal-price">
+            <span className={'price' + (product.on_sale ? ' sale' : '')}>{rm(product.unit_price)}</span>
+            {product.on_sale && <span className="price-old">{rm(product.price)}</span>}
+          </div>
+          {product.description && <p className="modal-description">{product.description}</p>}
 
           {product.stock > 0 && (
-            <div className="product-dialog-actions">
-              <div className="qty qty-large">
-                <button onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1} aria-label="One less">−</button>
+            <div className="modal-actions">
+              <div className="qty qty-lg">
+                <button onClick={() => setQty(Math.max(1, qty - 1))} disabled={qty <= 1} aria-label="Decrease">−</button>
                 <span>{qty}</span>
-                <button onClick={() => setQty(Math.min(maxQty, qty + 1))} disabled={qty >= maxQty} aria-label="One more">+</button>
+                <button onClick={() => setQty(Math.min(maxQty, qty + 1))} disabled={qty >= maxQty} aria-label="Increase">+</button>
               </div>
-              <button className="button button-accent" onClick={add} disabled={maxQty <= 0}>
-                {maxQty <= 0 ? 'All of it is in your cart' : 'Add to cart, ' + rm(product.unit_price * qty)}
+              <button className="btn btn-primary modal-add" onClick={add} disabled={maxQty <= 0}>
+                {maxQty <= 0 ? 'All stock is in your cart' : 'Add to cart · ' + rm(product.unit_price * qty)}
               </button>
             </div>
           )}
-          {inCartQty > 0 && <p className="product-dialog-incart">{inCartQty} already in your cart.</p>}
+          {inCartQty > 0 && <span className="in-cart">✓ {inCartQty} already in cart</span>}
         </div>
       </div>
     </div>

@@ -1,59 +1,55 @@
-import { PageShell, useBranches, branchStatus, hoursRows, shortBranch } from './Layout';
+import { useState, useEffect } from 'react';
+import { PageShell } from './Layout';
+
+const API = 'http://localhost/beaconmart-project/backend';
 
 function Stores() {
-  const branches = useBranches();
+  const [branches, setBranches] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch(API + '/branches/get_branches.php')
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) setBranches(result.data);
+      })
+      .catch(err => console.error('Error fetching branches:', err))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <PageShell>
-      <h1 className="page-title" data-reveal>Where to find us</h1>
-      <p className="page-lead" data-reveal>
-        Walk in, or order online and the branch you pick packs it for you.
+      <h1>Where to Find Us</h1>
+      <p className="page-lead">
+        Visit any of our outlets, or order online and choose the branch nearest to you.
       </p>
 
-      <div className="branch-list">
-        {branches.map(b => {
-          const status = branchStatus(b);
-          return (
-            <article key={b.branch_id} className="branch" data-reveal>
-              <div className="branch-name">
-                <h2>{shortBranch(b.branch_name)}</h2>
-                {status && <p className={'branch-status' + (status.open ? ' is-open' : '')}>{status.text.charAt(0).toUpperCase() + status.text.slice(1)}.</p>}
-              </div>
-              <div className="branch-detail">
-                <p className="branch-address">{b.address}</p>
-                <dl className="visit-hours">
-                  {hoursRows(b).map(([day, time]) => (
-                    <div key={day}><dt>{day}</dt><dd>{time}</dd></div>
-                  ))}
-                </dl>
-                {b.phone && <a className="visit-phone" href={'tel:' + b.phone.replace(/[^0-9+]/g, '')}>{b.phone}</a>}
-              </div>
-              <div className="branch-actions">
-                <a className="button button-accent" href={'/?branch=' + b.branch_id}>Shop this branch</a>
+      {loading && <p className="message">Loading...</p>}
+
+      <div className="store-list">
+        {branches.map(b => (
+          <div key={b.branch_id} className="store-card">
+            <div className="store-card-icon">🏪</div>
+            <div className="store-card-body">
+              <h2>{b.branch_name}</h2>
+              <p>📍 {b.address}</p>
+              {b.opening_hours && <p>🕗 {b.opening_hours}</p>}
+              {b.phone && <p>📞 <a href={'tel:' + b.phone.replace(/[^0-9+]/g, '')}>{b.phone}</a></p>}
+              <div className="store-card-actions">
                 <a
-                  className="text-link"
+                  className="btn btn-ghost btn-sm"
                   href={'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(b.address)}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
                   Get directions
                 </a>
+                <a className="btn btn-primary btn-sm" href={'/?branch=' + b.branch_id}>Shop this branch</a>
               </div>
-            </article>
-          );
-        })}
+            </div>
+          </div>
+        ))}
       </div>
-
-      <figure className="branch-figure" data-reveal>
-        <img
-          src="/assets/klang-river-6.jpg"
-          alt="The Klang River at sunset, with grass banks and apartment blocks"
-          width="1920"
-          height="1080"
-          loading="lazy"
-        />
-        <figcaption>The Klang River at Puchong Jaya. Photograph by Slleong, CC0.</figcaption>
-      </figure>
     </PageShell>
   );
 }

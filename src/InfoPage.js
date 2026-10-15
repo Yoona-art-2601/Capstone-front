@@ -7,7 +7,7 @@ function rm(value) {
 function AboutUs() {
   return (
     <>
-      <h1 className="page-title">About us</h1>
+      <h1>About Us</h1>
       <p className="page-lead">Healthy food, from our farm and trusted partners to your table.</p>
       <div className="info-card">
         <p>
@@ -41,27 +41,27 @@ function ContactUs({ settings }) {
   const wa = settings && settings.whatsapp_number;
   return (
     <>
-      <h1 className="page-title">Contact us</h1>
+      <h1>Contact Us</h1>
       <p className="page-lead">We are happy to help with orders, products and deliveries.</p>
       <div className="contact-grid">
         <div className="info-card">
-          <h2>WhatsApp</h2>
+          <h2>💬 WhatsApp</h2>
           <p>The fastest way to reach our customer service team.</p>
           {wa && (
-            <a className="button button-accent" href={'https://wa.me/' + wa} target="_blank" rel="noopener noreferrer">
+            <a className="btn btn-primary" href={'https://wa.me/' + wa} target="_blank" rel="noopener noreferrer">
               Chat on WhatsApp
             </a>
           )}
         </div>
         <div className="info-card">
-          <h2>Visit a store</h2>
+          <h2>🏪 Visit a store</h2>
           <p>Find the address, opening hours and phone number of each outlet.</p>
-          <a className="text-link" href="/stores">Where to find us</a>
+          <a className="btn btn-ghost" href="/stores">Where to Find Us</a>
         </div>
         <div className="info-card">
-          <h2>Order enquiries</h2>
+          <h2>📦 Order enquiries</h2>
           <p>Logged in customers can check the status of every order in My Orders. Please quote your order number when contacting us.</p>
-          <a className="text-link" href="/my-orders">My orders</a>
+          <a className="btn btn-ghost" href="/my-orders">My Orders</a>
         </div>
       </div>
     </>
@@ -71,7 +71,7 @@ function ContactUs({ settings }) {
 function DeliveryPolicy({ settings }) {
   return (
     <>
-      <h1 className="page-title">Delivery policy</h1>
+      <h1>Delivery Policy</h1>
       <div className="info-card">
         <h2>Delivery charges</h2>
         {settings ? (
@@ -98,7 +98,7 @@ function DeliveryPolicy({ settings }) {
 function RefundPolicy() {
   return (
     <>
-      <h1 className="page-title">Returns and refunds</h1>
+      <h1>Return &amp; Refund Policy</h1>
       <div className="info-card">
         <h2>Cancelling an order</h2>
         <p>
@@ -122,7 +122,7 @@ function RefundPolicy() {
 function PrivacyPolicy() {
   return (
     <>
-      <h1 className="page-title">Privacy policy</h1>
+      <h1>Privacy Policy</h1>
       <div className="info-card">
         <h2>Information we collect</h2>
         <ul>
@@ -147,7 +147,7 @@ function PrivacyPolicy() {
 function Terms() {
   return (
     <>
-      <h1 className="page-title">Terms of service</h1>
+      <h1>Terms of Service</h1>
       <div className="info-card">
         <ul>
           <li>Prices are shown in Malaysian Ringgit (RM) and may change without notice.</li>
