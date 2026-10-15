@@ -33,6 +33,20 @@ export function productIcon(product) {
 
 const rm = (value) => 'RM ' + Number(value).toFixed(2);
 
+const PROMOTIONS = 'Promotions';
+
+function withPricing(product) {
+  const price = Number(product.price);
+  const sale = product.sale_price === null ? null : Number(product.sale_price);
+  const onSale = sale !== null && sale < price;
+  return {
+    ...product,
+    on_sale: onSale,
+    unit_price: onSale ? sale : price,
+    discount_percent: onSale ? Math.round((1 - sale / price) * 100) : 0
+  };
+}
+
 function stockBadge(stock) {
   if (stock <= 0) return { text: 'Out of stock', cls: 'out' };
   if (stock <= 5) return { text: 'Only ' + stock + ' left', cls: 'low' };
@@ -126,20 +140,24 @@ function Store() {
     fetch(API + '/products/get_products.php?branch_id=' + branchId)
       .then(res => res.json())
       .then(result => {
-        if (result.success) setProducts(result.data);
+        if (result.success) setProducts(result.data.map(withPricing));
       })
       .catch(err => console.error('Error fetching products:', err))
       .finally(() => setLoadingProducts(false));
   }, [branchId]);
 
   const categories = useMemo(
-    () => ['All', ...Array.from(new Set(products.map(p => p.category).filter(Boolean))).sort()],
+    () => [
+      'All',
+      ...(products.some(p => p.on_sale) ? [PROMOTIONS] : []),
+      ...Array.from(new Set(products.map(p => p.category).filter(Boolean))).sort()
+    ],
     [products]
   );
 
   const visibleProducts = products
     .filter(p =>
-      (category === 'All' || p.category === category) &&
+      (category === 'All' || (category === PROMOTIONS ? p.on_sale : p.category === category)) &&
       p.name.toLowerCase().includes(search.trim().toLowerCase())
     )
     .sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
@@ -180,7 +198,7 @@ function Store() {
   };
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const cartSubtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const cartSubtotal = cart.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
   const deliveryFee = !settings || cartSubtotal >= settings.free_delivery_threshold ? 0 : settings.delivery_fee;
   const amountToFree = settings ? settings.free_delivery_threshold - cartSubtotal : 0;
   const cartTotal = cartSubtotal + deliveryFee;
@@ -315,7 +333,7 @@ function Store() {
                   className={'chip' + (category === c ? ' active' : '')}
                   onClick={() => setCategory(c)}
                 >
-                  {c === 'All' ? 'All' : categoryIcon(c) + ' ' + c}
+                  {c === 'All' ? 'All' : c === PROMOTIONS ? '🏷️ ' + c : categoryIcon(c) + ' ' + c}
                 </button>
               ))}
             </div>
@@ -335,12 +353,16 @@ function Store() {
                     <div className="product-image">
                       <span>{productIcon(product)}</span>
                       <span className={'stock-badge ' + badge.cls}>{badge.text}</span>
+                      {product.on_sale && <span className="sale-badge">-{product.discount_percent}%</span>}
                     </div>
                     <div className="product-info">
                       <span className="product-category">{product.category}</span>
                       <h3>{product.name}</h3>
                       <div className="product-bottom">
-                        <span className="price">{rm(product.price)}</span>
+                        <span className="price-block">
+                          <span className={'price' + (product.on_sale ? ' sale' : '')}>{rm(product.unit_price)}</span>
+                          {product.on_sale && <span className="price-old">{rm(product.price)}</span>}
+                        </span>
                         <button
                           className="btn btn-primary"
                           onClick={() => addToCart(product)}
@@ -375,7 +397,7 @@ function Store() {
                     <span className="cart-icon">{productIcon(item)}</span>
                     <div className="cart-item-info">
                       <strong>{item.name}</strong>
-                      <small>{rm(item.price)} each</small>
+                      <small>{rm(item.unit_price)} each</small>
                       <div className="qty">
                         <button onClick={() => changeQty(item.product_id, -1)} aria-label="Decrease">−</button>
                         <span>{item.quantity}</span>
@@ -387,7 +409,7 @@ function Store() {
                       </div>
                     </div>
                     <div className="cart-item-right">
-                      <strong>{rm(item.quantity * item.price)}</strong>
+                      <strong>{rm(item.quantity * item.unit_price)}</strong>
                       <button className="link-button" onClick={() => removeFromCart(item.product_id)}>Remove</button>
                     </div>
                   </li>

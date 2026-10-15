@@ -18,12 +18,14 @@ function ProductRow({ product, branchId, onDone }) {
   const [adjQty, setAdjQty] = useState('');
 
   const isLow = Number(product.stock) <= Number(product.low_stock_threshold);
+  const onSale = product.sale_price !== null && Number(product.sale_price) < Number(product.price);
 
   const startEdit = () => {
     setForm({
       name: product.name,
       category: product.category || '',
       price: product.price,
+      sale_price: product.sale_price === null ? '' : product.sale_price,
       low_stock_threshold: product.low_stock_threshold
     });
     setEditing(true);
@@ -39,7 +41,8 @@ function ProductRow({ product, branchId, onDone }) {
         product_id: product.product_id,
         name: form.name,
         category: form.category,
-        price: form.price
+        price: form.price,
+        sale_price: form.sale_price === '' ? null : form.sale_price
       });
       if (!r1.success) {
         onDone('Error: ' + r1.message);
@@ -121,7 +124,20 @@ function ProductRow({ product, branchId, onDone }) {
         {editing ? (
           <input type="number" step="0.01" min="0" className="narrow" value={form.price}
             onChange={(e) => setForm({ ...form, price: e.target.value })} />
+        ) : onSale ? (
+          <s className="muted">{Number(product.price).toFixed(2)}</s>
         ) : Number(product.price).toFixed(2)}
+      </td>
+      <td>
+        {editing ? (
+          <input type="number" step="0.01" min="0" className="narrow" placeholder="None" value={form.sale_price}
+            onChange={(e) => setForm({ ...form, sale_price: e.target.value })} />
+        ) : onSale ? (
+          <>
+            {Number(product.sale_price).toFixed(2)}{' '}
+            <span className="pill sale">-{Math.round((1 - product.sale_price / product.price) * 100)}%</span>
+          </>
+        ) : '-'}
       </td>
       <td>
         {product.stock} {isLow && <span className="pill cancelled">Low</span>}
@@ -271,6 +287,7 @@ function Inventory({ branchId, onChange }) {
               <th>Product</th>
               <th>Category</th>
               <th>Price (RM)</th>
+              <th>Sale price (RM)</th>
               <th>Stock</th>
               <th>Low-stock at</th>
               <th>Stock in / out</th>
@@ -279,7 +296,7 @@ function Inventory({ branchId, onChange }) {
           </thead>
           <tbody>
             {products.length === 0 && (
-              <tr><td colSpan="7">No products.</td></tr>
+              <tr><td colSpan="8">No products.</td></tr>
             )}
             {products.map(product => (
               <ProductRow

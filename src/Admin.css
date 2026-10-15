@@ -86,3 +86,6 @@ button.danger { color: #dc3545; }
 .pill.audit.stock { background: #d4edda; color: #155724; }
 .pill.audit.product { background: #e8dff5; color: #4b2c7f; }
 .pager { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 16px; }
+
+.pill.sale { background: #f8d7da; color: #b83a2e; }
+.admin-table s.muted { color: #888; }
