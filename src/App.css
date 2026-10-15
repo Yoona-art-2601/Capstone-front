@@ -217,11 +217,6 @@
 .login-hint { margin: 0; font-size: 13px; color: var(--muted); background: var(--green-50); padding: 8px 12px; border-radius: 8px; }
 .secure-note { text-align: center; color: var(--muted); }
 
-.store-footer {
-  text-align: center; padding: 20px; color: var(--muted); font-size: 13px;
-  border-top: 1px solid var(--border); background: var(--surface);
-}
-
 .auth-overlay {
   position: fixed; inset: 0; background: rgba(29, 58, 42, 0.45);
   display: flex; align-items: center; justify-content: center; z-index: 20; padding: 16px;
@@ -306,3 +301,68 @@
 .free-progress .bar { height: 6px; background: #f0dfbd; border-radius: 999px; margin-top: 8px; overflow: hidden; }
 .free-progress .bar div { height: 100%; background: var(--amber); border-radius: 999px; transition: width 0.3s; }
 .order-items .order-sub td { color: var(--muted); border-bottom: none; padding: 4px 0; }
+
+.site-footer { background: var(--green-900); color: #cfe0d5; margin-top: auto; }
+.footer-grid {
+  display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 32px;
+  padding: 40px 32px 28px; max-width: 1200px; margin: 0 auto;
+}
+.site-footer .brand { color: white; }
+.site-footer .brand-tag { color: #a9c4b2; }
+.site-footer .brand-mark { background: rgba(255, 255, 255, 0.1); }
+.footer-about { font-size: 14px; line-height: 1.6; margin: 14px 0 0; max-width: 300px; }
+.footer-grid h4 { color: white; margin: 6px 0 12px; font-size: 15px; }
+.footer-grid > div > a:not(.brand), .footer-grid > div > span { display: block; color: #cfe0d5; text-decoration: none; font-size: 14px; margin-bottom: 8px; }
+.footer-grid > div > a:not(.brand):hover { color: white; text-decoration: underline; }
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.12); text-align: center;
+  padding: 16px; font-size: 13px; color: #a9c4b2;
+}
+
+.whatsapp-button {
+  position: fixed; right: 22px; bottom: 22px; z-index: 15;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: #25d366; color: white; display: grid; place-items: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25); transition: transform 0.15s;
+}
+.whatsapp-button:hover { transform: scale(1.08); }
+
+.page-content { flex: 1; width: 100%; max-width: 960px; margin: 0 auto; padding: 28px 20px 48px; box-sizing: border-box; }
+.page-content h1 { font-size: 30px; margin: 0 0 6px; color: var(--green-900); }
+.page-content .my-orders { padding: 0; max-width: none; }
+.page-lead { color: var(--muted); margin: 0 0 24px; font-size: 16px; }
+.info-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 22px 26px; box-shadow: var(--shadow); line-height: 1.65;
+}
+.info-card h2 { font-size: 18px; color: var(--green-900); margin: 18px 0 6px; }
+.info-card h2:first-child { margin-top: 0; }
+.info-card ul { padding-left: 20px; margin: 8px 0; }
+.contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.contact-grid .info-card { display: flex; flex-direction: column; align-items: flex-start; }
+.contact-grid .info-card p { flex: 1; }
+
+.store-list { display: grid; gap: 18px; }
+.store-card {
+  display: flex; gap: 18px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow);
+}
+.store-card-icon {
+  width: 64px; height: 64px; flex-shrink: 0; border-radius: 16px; background: var(--green-100);
+  display: grid; place-items: center; font-size: 32px;
+}
+.store-card-body h2 { margin: 0 0 8px; font-size: 20px; color: var(--green-900); }
+.store-card-body p { margin: 4px 0; color: var(--text); }
+.store-card-body a { color: var(--green-700); font-weight: 700; }
+.store-card-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.store-card-actions .btn-primary { color: white; }
+
+@media (max-width: 900px) {
+  .footer-grid { grid-template-columns: 1fr 1fr; padding: 28px 20px; }
+  .hide-mobile { display: none; }
+}
+@media (max-width: 480px) {
+  .footer-grid { grid-template-columns: 1fr; }
+  .store-card { flex-direction: column; }
+  .whatsapp-button { right: 16px; bottom: 16px; width: 50px; height: 50px; }
+}

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import './App.css';
 import CustomerAuth from './CustomerAuth';
+import { SiteFooter, WhatsAppButton } from './Layout';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -40,7 +41,9 @@ function stockBadge(stock) {
 
 function Store() {
   const [branches, setBranches] = useState([]);
-  const [branchId, setBranchId] = useState(1);
+  const [branchId, setBranchId] = useState(
+    () => Number(new URLSearchParams(window.location.search).get('branch')) || 1
+  );
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [cart, setCart] = useState([]);
@@ -103,7 +106,7 @@ function Store() {
     } else if (payment === 'cancelled') {
       showNotice('Payment cancelled. Your order was not placed.', 'error');
     }
-    if (payment) {
+    if (payment || params.get('branch')) {
       window.history.replaceState({}, '', '/');
     }
   }, []);
@@ -261,6 +264,7 @@ function Store() {
         </label>
 
         <div className="topbar-actions">
+          <a href="/stores" className="btn btn-ghost hide-mobile">Our Stores</a>
           {user ? (
             <>
               <span className="greeting">Hi, {user.name}</span>
@@ -455,9 +459,8 @@ function Store() {
         </aside>
       </div>
 
-      <footer className="store-footer">
-        © {new Date().getFullYear()} Beacon Mart · Natural &amp; Healthy Food
-      </footer>
+      <SiteFooter />
+      <WhatsAppButton />
     </div>
   );
 }

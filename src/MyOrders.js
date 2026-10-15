@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { productIcon } from './store';
+import { PageShell } from './Layout';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -33,20 +34,7 @@ function MyOrders() {
   }, []);
 
   return (
-    <div className="my-orders-page">
-      <header className="topbar">
-        <a href="/" className="brand">
-          <span className="brand-mark">🌿</span>
-          <span>
-            <span className="brand-name">Beacon Mart</span>
-            <span className="brand-tag">Natural &amp; Healthy Food</span>
-          </span>
-        </a>
-        <div className="topbar-actions">
-          <a href="/" className="btn btn-ghost">&larr; Back to store</a>
-        </div>
-      </header>
-
+    <PageShell>
       <div className="my-orders">
         <h1>My Orders</h1>
 
@@ -100,7 +88,7 @@ function MyOrders() {
           );
         })}
       </div>
-    </div>
+    </PageShell>
   );
 }
 
