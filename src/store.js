@@ -3,6 +3,7 @@ import './App.css';
 import CustomerAuth from './CustomerAuth';
 import { SiteFooter, WhatsAppButton } from './Layout';
 import ProductModal, { productImageUrl } from './ProductModal';
+import { loadSavedBranch, saveBranch, loadSavedCart, saveCart, clearSavedCart, rebuildCart } from './cartStorage';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -36,7 +37,7 @@ const rm = (value) => 'RM ' + Number(value).toFixed(2);
 
 const PROMOTIONS = 'Promotions';
 
-function withPricing(product) {
+export function withPricing(product) {
   const price = Number(product.price);
   const sale = product.sale_price === null ? null : Number(product.sale_price);
   const onSale = sale !== null && sale < price;
@@ -57,18 +58,15 @@ function stockBadge(stock) {
 function Store() {
   const [branches, setBranches] = useState([]);
   const [branchId, setBranchId] = useState(
-    () => Number(new URLSearchParams(window.location.search).get('branch')) || 1
+    () => Number(new URLSearchParams(window.location.search).get('branch')) || loadSavedBranch() || 1
   );
+  const hydratedBranch = useRef(null);
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const [cart, setCart] = useState([]);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
-  const [customerName, setCustomerName] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [customerAddress, setCustomerAddress] = useState('');
   const [notice, setNotice] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
   const [detailProduct, setDetailProduct] = useState(null);
@@ -82,7 +80,6 @@ function Store() {
       })
       .catch(err => console.error('Error fetching shop settings:', err));
   }, []);
-  const cartRef = useRef(null);
 
   const showNotice = (text, type = 'info') => setNotice({ text, type });
 
@@ -90,17 +87,13 @@ function Store() {
     fetch(API + '/auth/me.php', { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
-        if (result.success) {
-          setUser(result.user);
-          setCustomerName(result.user.name);
-        }
+        if (result.success) setUser(result.user);
       })
       .catch(err => console.error('Error checking login:', err));
   }, []);
 
   const handleLogin = (loggedInUser) => {
     setUser(loggedInUser);
-    setCustomerName(loggedInUser.name);
     setShowAuth(false);
     showNotice('Welcome, ' + loggedInUser.name + '!', 'success');
   };
@@ -109,7 +102,6 @@ function Store() {
     fetch(API + '/auth/logout.php', { credentials: 'include' })
       .finally(() => {
         setUser(null);
-        setCustomerName('');
         showNotice('You have logged out.');
       });
   };
@@ -118,6 +110,7 @@ function Store() {
     const params = new URLSearchParams(window.location.search);
     const payment = params.get('payment');
     if (payment === 'success') {
+      clearSavedCart();
       showNotice('Payment successful! Order #' + params.get('order_id') + ' has been placed.', 'success');
     } else if (payment === 'cancelled') {
       showNotice('Payment cancelled. Your order was not placed.', 'error');
@@ -137,16 +130,28 @@ function Store() {
   }, []);
 
   useEffect(() => {
+    saveBranch(branchId);
     setCart([]);
     setLoadingProducts(true);
     fetch(API + '/products/get_products.php?branch_id=' + branchId)
       .then(res => res.json())
       .then(result => {
-        if (result.success) setProducts(result.data.map(withPricing));
+        if (result.success) {
+          const priced = result.data.map(withPricing);
+          setProducts(priced);
+          setCart(rebuildCart(loadSavedCart(branchId), priced));
+        }
       })
       .catch(err => console.error('Error fetching products:', err))
-      .finally(() => setLoadingProducts(false));
+      .finally(() => {
+        hydratedBranch.current = branchId;
+        setLoadingProducts(false);
+      });
   }, [branchId]);
+
+  useEffect(() => {
+    if (hydratedBranch.current === branchId) saveCart(branchId, cart);
+  }, [cart, branchId]);
 
   const categories = useMemo(
     () => [
@@ -273,59 +278,6 @@ function Store() {
   const amountToFree = settings ? settings.free_delivery_threshold - cartSubtotal : 0;
   const cartTotal = cartSubtotal + deliveryFee;
 
-  const handleCheckout = (e) => {
-    e.preventDefault();
-    if (!customerName.trim()) {
-      showNotice('Please enter your name.', 'error');
-      return;
-    }
-    if (!customerPhone.trim()) {
-      showNotice('Please enter your phone number.', 'error');
-      return;
-    }
-    if (!customerAddress.trim()) {
-      showNotice('Please enter your delivery address.', 'error');
-      return;
-    }
-    if (cart.length === 0) {
-      showNotice('Your cart is empty.', 'error');
-      return;
-    }
-
-    setSubmitting(true);
-    setNotice(null);
-
-    fetch(API + '/payment/create_checkout_session.php', {
-      credentials: 'include',
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        branch_id: branchId,
-        customer_name: customerName,
-        customer_phone: customerPhone,
-        customer_address: customerAddress,
-        items: cart.map(item => ({
-          product_id: item.product_id,
-          quantity: item.quantity
-        }))
-      })
-    })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          window.location.href = result.checkout_url;
-        } else {
-          showNotice('Error: ' + result.message, 'error');
-          setSubmitting(false);
-        }
-      })
-      .catch(err => {
-        console.error(err);
-        showNotice('Could not connect to the server.', 'error');
-        setSubmitting(false);
-      });
-  };
-
   return (
     <div className="store">
       {settings && (
@@ -362,12 +314,9 @@ function Store() {
           ) : (
             <button className="btn btn-ghost" onClick={() => setShowAuth(true)}>Login / Register</button>
           )}
-          <button
-            className="cart-button"
-            onClick={() => cartRef.current && cartRef.current.scrollIntoView({ behavior: 'smooth' })}
-          >
+          <a href="/cart" className="cart-button" aria-label="View cart">
             🛒 <span className="cart-count">{cartCount}</span>
-          </button>
+          </a>
         </div>
       </header>
 
@@ -445,7 +394,7 @@ function Store() {
           )}
         </main>
 
-        <aside className="cart-panel" ref={cartRef}>
+        <aside className="cart-panel">
           <h2>Your Cart {cartCount > 0 && <span className="cart-count">{cartCount}</span>}</h2>
 
           {cart.length === 0 ? (
@@ -512,37 +461,8 @@ function Store() {
                 <strong>{rm(cartTotal)}</strong>
               </div>
 
-              <form className="checkout-form" onSubmit={handleCheckout}>
-                <h3>Delivery details</h3>
-                {!user && (
-                  <p className="login-hint">
-                    <button type="button" className="link-button" onClick={() => setShowAuth(true)}>Login</button>
-                    {' '}to track this order in My Orders, or continue as guest.
-                  </p>
-                )}
-                <label>
-                  Full name
-                  <input type="text" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-                </label>
-                <label>
-                  Phone number
-                  <input
-                    type="tel" placeholder="e.g. 012-3456789" value={customerPhone}
-                    onChange={(e) => setCustomerPhone(e.target.value)}
-                  />
-                </label>
-                <label>
-                  Delivery address
-                  <textarea
-                    rows={3} placeholder="Street, postcode, city" value={customerAddress}
-                    onChange={(e) => setCustomerAddress(e.target.value)}
-                  />
-                </label>
-                <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
-                  {submitting ? 'Redirecting to payment...' : 'Pay ' + rm(cartTotal)}
-                </button>
-                <small className="secure-note">🔒 Secure payment by Stripe</small>
-              </form>
+              <a href="/cart" className="btn btn-primary btn-block">Checkout</a>
+              <small className="secure-note">Enter delivery details and pay on the next page</small>
             </>
           )}
         </aside>
