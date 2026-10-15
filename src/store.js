@@ -53,6 +53,16 @@ function Store() {
   const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [settings, setSettings] = useState(null);
+
+  useEffect(() => {
+    fetch(API + '/shop/get_settings.php')
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) setSettings(result.data);
+      })
+      .catch(err => console.error('Error fetching shop settings:', err));
+  }, []);
   const cartRef = useRef(null);
 
   const showNotice = (text, type = 'info') => setNotice({ text, type });
@@ -167,7 +177,10 @@ function Store() {
   };
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const cartSubtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const deliveryFee = !settings || cartSubtotal >= settings.free_delivery_threshold ? 0 : settings.delivery_fee;
+  const amountToFree = settings ? settings.free_delivery_threshold - cartSubtotal : 0;
+  const cartTotal = cartSubtotal + deliveryFee;
 
   const handleCheckout = (e) => {
     e.preventDefault();
@@ -224,6 +237,11 @@ function Store() {
 
   return (
     <div className="store">
+      {settings && (
+        <div className="announcement">
+          🚚 FREE delivery for orders {rm(settings.free_delivery_threshold)} and above
+        </div>
+      )}
       <header className="topbar">
         <a href="/" className="brand">
           <span className="brand-mark">🌿</span>
@@ -371,6 +389,30 @@ function Store() {
                   </li>
                 ))}
               </ul>
+
+              <div className="cart-summary">
+                <div className="summary-row">
+                  <span>Subtotal</span>
+                  <span>{rm(cartSubtotal)}</span>
+                </div>
+                <div className="summary-row">
+                  <span>Delivery</span>
+                  {deliveryFee === 0
+                    ? <span className="free">FREE</span>
+                    : <span>{rm(deliveryFee)}</span>}
+                </div>
+                {settings && amountToFree > 0 && (
+                  <div className="free-progress">
+                    <span>Add <strong>{rm(amountToFree)}</strong> more for FREE delivery</span>
+                    <div className="bar">
+                      <div style={{ width: Math.min(100, (cartSubtotal / settings.free_delivery_threshold) * 100) + '%' }} />
+                    </div>
+                  </div>
+                )}
+                {settings && amountToFree <= 0 && (
+                  <div className="free-progress done">🎉 You've unlocked FREE delivery!</div>
+                )}
+              </div>
 
               <div className="cart-total">
                 <span>Total</span>

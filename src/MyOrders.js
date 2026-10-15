@@ -78,6 +78,12 @@ function MyOrders() {
                       <td className="num">RM {Number(item.subtotal).toFixed(2)}</td>
                     </tr>
                   ))}
+                  <tr className="order-sub">
+                    <td>Delivery</td>
+                    <td className="num">
+                      {Number(order.delivery_fee) > 0 ? 'RM ' + Number(order.delivery_fee).toFixed(2) : 'FREE'}
+                    </td>
+                  </tr>
                   <tr className="order-total">
                     <td>Total</td>
                     <td className="num">RM {Number(order.total_amount).toFixed(2)}</td>
