@@ -11,7 +11,96 @@ function post(path, body) {
   }).then(res => res.json());
 }
 
+function ProductDetails({ product, onDone }) {
+  const [description, setDescription] = useState(product.description || '');
+  const [file, setFile] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const imageSrc = product.image_url ? API + '/' + product.image_url : null;
+
+  const sendImage = async (formData, successMsg) => {
+    setBusy(true);
+    try {
+      const res = await fetch(API + '/products/upload_image.php', {
+        credentials: 'include',
+        method: 'POST',
+        body: formData
+      });
+      const result = await res.json();
+      onDone(result.success ? successMsg : 'Error: ' + result.message);
+      if (result.success) setFile(null);
+    } catch (err) {
+      console.error(err);
+      onDone('Could not connect to the server.');
+    }
+    setBusy(false);
+  };
+
+  const uploadImage = () => {
+    if (!file) {
+      onDone('Choose an image file first.');
+      return;
+    }
+    const fd = new FormData();
+    fd.append('product_id', product.product_id);
+    fd.append('image', file);
+    sendImage(fd, 'Image uploaded for "' + product.name + '".');
+  };
+
+  const removeImage = () => {
+    if (!window.confirm('Remove the image of "' + product.name + '"?')) return;
+    const fd = new FormData();
+    fd.append('product_id', product.product_id);
+    fd.append('remove', '1');
+    sendImage(fd, 'Image removed from "' + product.name + '".');
+  };
+
+  const saveDescription = async () => {
+    setBusy(true);
+    try {
+      const result = await post('/products/update_product.php', {
+        product_id: product.product_id,
+        name: product.name,
+        category: product.category,
+        price: product.price,
+        description
+      });
+      onDone(result.success ? 'Description saved for "' + product.name + '".' : 'Error: ' + result.message);
+    } catch (err) {
+      console.error(err);
+      onDone('Could not connect to the server.');
+    }
+    setBusy(false);
+  };
+
+  return (
+    <tr className="details-row">
+      <td colSpan="8">
+        <div className="details-panel">
+          <div className="details-image">
+            {imageSrc ? <img src={imageSrc} alt={product.name} /> : <span>No image</span>}
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={(e) => setFile(e.target.files[0] || null)} />
+            <div>
+              <button onClick={uploadImage} disabled={busy || !file}>Upload image</button>{' '}
+              {imageSrc && <button className="danger" onClick={removeImage} disabled={busy}>Remove image</button>}
+            </div>
+            <small>JPG, PNG, WebP or GIF, max 3MB.</small>
+          </div>
+          <div className="details-description">
+            <label>
+              Description (shown on the product page)
+              <textarea rows={5} value={description} onChange={(e) => setDescription(e.target.value)} />
+            </label>
+            <button onClick={saveDescription} disabled={busy}>Save description</button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
 function ProductRow({ product, branchId, onDone }) {
+  const [showDetails, setShowDetails] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
   const [adjType, setAdjType] = useState('Restock');
@@ -109,11 +198,19 @@ function ProductRow({ product, branchId, onDone }) {
   };
 
   return (
+    <>
     <tr className={isLow ? 'low-row' : ''}>
       <td>
         {editing ? (
           <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-        ) : product.name}
+        ) : (
+          <span className="product-cell">
+            {product.image_url
+              ? <img className="thumb" src={API + '/' + product.image_url} alt="" />
+              : <span className="thumb thumb-empty" />}
+            {product.name}
+          </span>
+        )}
       </td>
       <td>
         {editing ? (
@@ -167,11 +264,14 @@ function ProductRow({ product, branchId, onDone }) {
         ) : (
           <>
             <button onClick={startEdit}>Edit</button>{' '}
+            <button onClick={() => setShowDetails(!showDetails)}>{showDetails ? 'Hide details' : 'Details'}</button>{' '}
             <button className="danger" onClick={removeProduct}>Remove</button>
           </>
         )}
       </td>
     </tr>
+    {showDetails && <ProductDetails product={product} onDone={onDone} />}
+    </>
   );
 }
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import './App.css';
 import CustomerAuth from './CustomerAuth';
 import { SiteFooter, WhatsAppButton } from './Layout';
+import ProductModal, { productImageUrl } from './ProductModal';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -70,6 +71,7 @@ function Store() {
   const [submitting, setSubmitting] = useState(false);
   const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [detailProduct, setDetailProduct] = useState(null);
   const [settings, setSettings] = useState(null);
 
   useEffect(() => {
@@ -164,10 +166,10 @@ function Store() {
 
   const branchName = (branches.find(b => b.branch_id === branchId) || {}).branch_name || '';
 
-  const addToCart = (product) => {
+  const addToCart = (product, qty = 1) => {
     const existing = cart.find(item => item.product_id === product.product_id);
     const currentQty = existing ? existing.quantity : 0;
-    if (currentQty >= product.stock) {
+    if (currentQty + qty > product.stock) {
       showNotice('Only ' + product.stock + ' of ' + product.name + ' available at this branch.', 'error');
       return;
     }
@@ -175,12 +177,17 @@ function Store() {
     if (existing) {
       setCart(cart.map(item =>
         item.product_id === product.product_id
-          ? { ...item, quantity: item.quantity + 1 }
+          ? { ...item, quantity: item.quantity + qty }
           : item
       ));
     } else {
-      setCart([...cart, { ...product, quantity: 1 }]);
+      setCart([...cart, { ...product, quantity: qty }]);
     }
+  };
+
+  const cartQtyOf = (product) => {
+    const item = cart.find(i => i.product_id === product.product_id);
+    return item ? item.quantity : 0;
   };
 
   const changeQty = (productId, delta) => {
@@ -302,6 +309,15 @@ function Store() {
       </header>
 
       {showAuth && <CustomerAuth onLogin={handleLogin} onClose={() => setShowAuth(false)} />}
+      {detailProduct && (
+        <ProductModal
+          product={detailProduct}
+          icon={productIcon(detailProduct)}
+          inCartQty={cartQtyOf(detailProduct)}
+          onAdd={addToCart}
+          onClose={() => setDetailProduct(null)}
+        />
+      )}
 
       <section className="hero">
         <div>
@@ -350,14 +366,23 @@ function Store() {
                 const inCart = cart.find(item => item.product_id === product.product_id);
                 return (
                   <div key={product.product_id} className="product-card">
-                    <div className="product-image">
-                      <span>{productIcon(product)}</span>
+                    <div
+                      className="product-image clickable"
+                      onClick={() => setDetailProduct(product)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => { if (e.key === 'Enter') setDetailProduct(product); }}
+                      aria-label={'View details of ' + product.name}
+                    >
+                      {productImageUrl(product)
+                        ? <img src={productImageUrl(product)} alt={product.name} loading="lazy" />
+                        : <span>{productIcon(product)}</span>}
                       <span className={'stock-badge ' + badge.cls}>{badge.text}</span>
                       {product.on_sale && <span className="sale-badge">-{product.discount_percent}%</span>}
                     </div>
                     <div className="product-info">
                       <span className="product-category">{product.category}</span>
-                      <h3>{product.name}</h3>
+                      <h3 className="clickable" onClick={() => setDetailProduct(product)}>{product.name}</h3>
                       <div className="product-bottom">
                         <span className="price-block">
                           <span className={'price' + (product.on_sale ? ' sale' : '')}>{rm(product.unit_price)}</span>
@@ -394,7 +419,9 @@ function Store() {
               <ul className="cart-items">
                 {cart.map(item => (
                   <li key={item.product_id}>
-                    <span className="cart-icon">{productIcon(item)}</span>
+                    <span className="cart-icon">
+                      {productImageUrl(item) ? <img src={productImageUrl(item)} alt="" /> : productIcon(item)}
+                    </span>
                     <div className="cart-item-info">
                       <strong>{item.name}</strong>
                       <small>{rm(item.unit_price)} each</small>

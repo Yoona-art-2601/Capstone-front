@@ -89,3 +89,15 @@ button.danger { color: #dc3545; }
 
 .pill.sale { background: #f8d7da; color: #b83a2e; }
 .admin-table s.muted { color: #888; }
+
+.product-cell { display: flex; align-items: center; gap: 10px; }
+.thumb { width: 40px; height: 40px; border-radius: 6px; object-fit: cover; flex-shrink: 0; border: 1px solid #ddd; background: white; }
+.thumb-empty { display: inline-block; background: #f0f0f0; }
+.details-row td { background: #fafafa; }
+.details-panel { display: flex; gap: 24px; flex-wrap: wrap; padding: 6px 0; }
+.details-image { display: flex; flex-direction: column; gap: 8px; width: 240px; }
+.details-image img { width: 200px; height: 200px; object-fit: contain; background: white; border: 1px solid #ddd; border-radius: 8px; }
+.details-image > span { width: 200px; height: 200px; display: grid; place-items: center; background: #eee; border-radius: 8px; color: #888; }
+.details-description { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.details-description label { display: flex; flex-direction: column; gap: 6px; width: 100%; font-weight: bold; font-size: 13px; }
+.details-description textarea { width: 100%; box-sizing: border-box; padding: 8px; font-family: inherit; font-size: 14px; font-weight: normal; }
