@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import './App.css';
 import CustomerAuth from './CustomerAuth';
 import { Stars } from './Stars';
+import NotificationBell from './NotificationBell';
 import { SiteFooter, WhatsAppButton } from './Layout';
 import ProductModal, { productImageUrl } from './ProductModal';
 import { loadSavedBranch, saveBranch, loadSavedCart, saveCart, clearSavedCart, rebuildCart } from './cartStorage';
@@ -114,6 +115,19 @@ function Store() {
       })
       .catch(err => console.error('Error checking login:', err));
   }, []);
+
+  const [stockAlerts, setStockAlerts] = useState([]);
+
+  useEffect(() => {
+    if (!user) {
+      setStockAlerts([]);
+      return;
+    }
+    fetch(API + '/notifications/stock_alert.php', { credentials: 'include' })
+      .then(res => res.json())
+      .then(result => { if (result.success) setStockAlerts(result.data); })
+      .catch(() => {});
+  }, [user]);
 
   const handleLogin = (loggedInUser) => {
     setUser(loggedInUser);
@@ -229,6 +243,30 @@ function Store() {
     }
   };
 
+  const hasAlert = (product) =>
+    stockAlerts.some(a => Number(a.product_id) === product.product_id && Number(a.branch_id) === branchId);
+
+  const requestStockAlert = (product) => {
+    if (!user) {
+      showNotice('Please login so we can notify you when ' + product.name + ' is back in stock.', 'info');
+      setShowAuth(true);
+      return;
+    }
+    fetch(API + '/notifications/stock_alert.php', {
+      credentials: 'include',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: product.product_id, branch_id: branchId })
+    })
+      .then(res => res.json())
+      .then(result => {
+        showNotice(result.success ? 'We will notify you when ' + product.name + ' is back in stock.' : result.message,
+          result.success ? 'success' : 'error');
+        if (result.success) setStockAlerts(alerts => [...alerts, { product_id: product.product_id, branch_id: branchId }]);
+      })
+      .catch(() => showNotice('Could not connect to the server.', 'error'));
+  };
+
   const cartQtyOf = (product) => {
     const item = cart.find(i => i.product_id === product.product_id);
     return item ? item.quantity : 0;
@@ -288,13 +326,17 @@ function Store() {
               {product.on_sale && <span className="price-old">{rm(product.price)}</span>}
             </span>
             {product.on_sale && product.sale_end && <span className="promo-end">Promo ends {formatEnd(product.sale_end)}</span>}
-            <button
-              className="btn btn-primary"
-              onClick={() => addToCart(product)}
-              disabled={product.stock <= 0}
-            >
-              {product.stock <= 0 ? 'Sold out' : inCart ? 'Add more' : 'Add to cart'}
-            </button>
+            {product.stock <= 0 ? (
+              hasAlert(product) ? (
+                <button className="btn btn-ghost" disabled>We'll notify you</button>
+              ) : (
+                <button className="btn btn-ghost" onClick={() => requestStockAlert(product)}>Notify me</button>
+              )
+            ) : (
+              <button className="btn btn-primary" onClick={() => addToCart(product)}>
+                {inCart ? 'Add more' : 'Add to cart'}
+              </button>
+            )}
           </div>
           {Number(product.sold) > 0 && <span className="sold-count">{product.sold} sold</span>}
           {inCart && <span className="in-cart">✓ {inCart.quantity} in cart</span>}
@@ -353,6 +395,7 @@ function Store() {
           <a href="/stores" className="btn btn-ghost hide-mobile">Our Stores</a>
           {user ? (
             <>
+              <NotificationBell />
               <span className="greeting">Hi, {user.name}</span>
               <a href="/my-orders" className="btn btn-ghost">My Orders</a>
               <button className="btn btn-ghost" onClick={handleLogout}>Logout</button>

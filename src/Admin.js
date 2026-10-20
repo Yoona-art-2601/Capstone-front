@@ -5,6 +5,7 @@ import Inventory from './Inventory';
 import Transfers from './Transfers'
 import Dashboard from './Dashboard';
 import Login from './Login';
+import NotificationBell from './NotificationBell';
 import AuditTrail from './AuditTrail';
 
 const API = 'http://localhost/beaconmart-project/backend';
@@ -86,6 +87,7 @@ function AdminPanel({ user, onLogout }) {
             </select>
           </label>
           <a href="/" className="admin-link">&larr; Back to store</a>
+          <NotificationBell variant="admin" onOpenLink={(link) => { if (TABS.some(t => t.key === link)) setTab(link); }} />
           <span className="admin-user">{user.name}</span>
           <button className="logout-btn" onClick={onLogout}>Logout</button>
         </div>

@@ -570,3 +570,35 @@ h3.clickable:hover { color: var(--green-700); text-decoration: underline; }
 .filter-bar .link-button { padding-bottom: 8px; font-size: 14px; }
 .filter-bar .result-count { margin-left: auto; padding-bottom: 8px; font-size: 14px; color: var(--muted); }
 .promo-end { font-size: 12px; font-weight: 700; color: var(--red); }
+
+.notif { position: relative; }
+.notif-button {
+  position: relative; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--border, #ddd); background: transparent; color: inherit; cursor: pointer;
+}
+.notif-admin .notif-button { border-color: rgba(255, 255, 255, 0.35); color: white; }
+.notif-count {
+  position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px;
+  background: #c0392b; color: white; font-size: 11px; font-weight: 800; display: grid; place-items: center; box-sizing: border-box;
+}
+.notif-panel {
+  position: absolute; right: 0; top: 48px; z-index: 40; width: min(360px, 92vw); max-height: 70vh; overflow-y: auto;
+  background: white; color: #1f2a24; border-radius: 12px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18); text-align: left;
+  font-family: inherit;
+}
+.notif-head { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid #eee; }
+.notif-markall { background: none; border: none; color: #2d6a45; font-weight: 700; cursor: pointer; font-size: 13px; }
+.notif-empty { padding: 20px 16px; margin: 0; color: #6b7a71; font-size: 14px; }
+.notif-panel ul { list-style: none; margin: 0; padding: 0; }
+.notif-item { display: flex; gap: 10px; width: 100%; padding: 12px 16px; border: none; border-bottom: 1px solid #f1f1f1; background: white; text-align: left; cursor: pointer; font: inherit; color: inherit; }
+.notif-item:hover { background: #f6f8f6; }
+.notif-item.unread { background: #f2f8f4; }
+.notif-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; margin-top: 6px; background: #9aa59f; }
+.notif-dot.low_stock { background: #e8a33d; }
+.notif-dot.out_of_stock { background: #c0392b; }
+.notif-dot.back_in_stock { background: #2d6a45; }
+.notif-dot.order_status { background: #2b5a9e; }
+.notif-text { display: grid; gap: 2px; font-size: 13px; }
+.notif-text strong { font-size: 14px; }
+.notif-text span { color: #4f5a54; line-height: 1.4; }
+.notif-text small { color: #8a948e; font-size: 12px; }
