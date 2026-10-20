@@ -1,7 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 
 const API = 'http://localhost/beaconmart-project/backend';
-const STATUS_OPTIONS = ['Pending', 'Processing', 'Completed', 'Cancelled'];
+const STATUS_OPTIONS = ['Pending', 'Processing', 'Out for Delivery', 'Ready for Pickup', 'Completed', 'Cancelled'];
+const PAYMENT_LABELS = { Stripe: 'Online (Stripe)', COD: 'Cash on delivery', PayAtStore: 'Pay at store' };
+
+function nextStatuses(order) {
+  const steps = order.steps || ['Pending', 'Processing', 'Out for Delivery', 'Completed'];
+  const index = steps.indexOf(order.status);
+  return [order.status, ...(index === -1 ? [] : steps.slice(index + 1)), 'Cancelled'];
+}
 
 function Orders({ branchId }) {
   const [orders, setOrders] = useState([]);
@@ -65,7 +72,7 @@ function Orders({ branchId }) {
     : orders.filter(o => o.status === statusFilter);
 
   const isEditable = (order) =>
-    order.status !== 'Cancelled' && order.status !== 'Awaiting Payment';
+    !['Cancelled', 'Completed', 'Awaiting Payment'].includes(order.status);
 
   return (
     <div>
@@ -97,6 +104,7 @@ function Orders({ branchId }) {
               <th>Branch</th>
               <th>Items</th>
               <th>Total (RM)</th>
+              <th>Fulfilment</th>
               <th>Payment</th>
               <th>Status</th>
               <th>Date</th>
@@ -104,7 +112,7 @@ function Orders({ branchId }) {
           </thead>
           <tbody>
             {shown.length === 0 && (
-              <tr><td colSpan="8">No orders found.</td></tr>
+              <tr><td colSpan="9">No orders found.</td></tr>
             )}
             {shown.map(order => (
               <tr key={order.order_id}>
@@ -128,9 +136,16 @@ function Orders({ branchId }) {
                 </td>
                 <td>{Number(order.total_amount).toFixed(2)}</td>
                 <td>
+                  {order.delivery_type === 'Pickup' ? 'Self pickup' : 'Delivery'}
+                  {order.distance_km && <small> ({Number(order.distance_km).toFixed(1)} km)</small>}
+                  {order.slot_date && <><br /><small>{order.slot_date} {order.slot_time}</small></>}
+                </td>
+                <td>
                   <span className={'pill ' + (order.payment_status === 'Paid' ? 'paid' : 'unpaid')}>
                     {order.payment_status}
                   </span>
+                  <br />
+                  <small>{PAYMENT_LABELS[order.payment_method] || order.payment_method}</small>
                 </td>
                 <td>
                   {isEditable(order) ? (
@@ -138,12 +153,12 @@ function Orders({ branchId }) {
                       value={order.status}
                       onChange={(e) => changeStatus(order, e.target.value)}
                     >
-                      {STATUS_OPTIONS.map(s => (
+                      {nextStatuses(order).map(s => (
                         <option key={s} value={s}>{s}</option>
                       ))}
                     </select>
                   ) : (
-                    <span className={'pill ' + (order.status === 'Cancelled' ? 'cancelled' : 'unpaid')}>
+                    <span className={'pill ' + (order.status === 'Cancelled' ? 'cancelled' : order.status === 'Completed' ? 'paid' : 'unpaid')}>
                       {order.status}
                     </span>
                   )}

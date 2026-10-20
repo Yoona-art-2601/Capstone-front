@@ -1,14 +1,63 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import { productIcon } from './store';
 import { PageShell } from './Layout';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
+const PAYMENT_LABELS = { Stripe: 'Online payment', COD: 'Cash on delivery', PayAtStore: 'Pay at store' };
+
+export function stepLabel(status, deliveryType) {
+  if (status === 'Completed') return deliveryType === 'Pickup' ? 'Picked up' : 'Delivered';
+  if (status === 'Pending') return 'Order placed';
+  return status;
+}
+
 function statusLabel(order) {
   if (order.status === 'Cancelled') return { text: 'Cancelled', cls: 'cancelled' };
   if (order.status === 'Awaiting Payment') return { text: 'Awaiting Payment', cls: 'unpaid' };
-  return { text: order.status, cls: order.status.toLowerCase() };
+  return { text: stepLabel(order.status, order.delivery_type), cls: order.status.toLowerCase().replace(/\s+/g, '-') };
+}
+
+function formatTime(value) {
+  if (!value) return '';
+  const d = new Date(value.replace(' ', 'T'));
+  return d.toLocaleString('en-MY', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+}
+
+function OrderTimeline({ order }) {
+  const steps = order.steps || ['Pending', 'Processing', 'Out for Delivery', 'Completed'];
+  const history = order.history || [];
+  const reachedAt = {};
+  history.forEach(h => { reachedAt[h.status] = h.changed_at; });
+  const currentIndex = steps.indexOf(order.status);
+
+  if (order.status === 'Cancelled') {
+    const cancel = [...history].reverse().find(h => h.status === 'Cancelled');
+    return (
+      <div className="timeline-cancelled">
+        Cancelled {cancel ? formatTime(cancel.changed_at) : ''}{cancel && cancel.note ? ' · ' + cancel.note : ''}
+      </div>
+    );
+  }
+  if (order.status === 'Awaiting Payment') {
+    return <div className="timeline-cancelled waiting">Waiting for online payment to be completed.</div>;
+  }
+
+  return (
+    <ol className="timeline">
+      {steps.map((step, i) => {
+        const state = i < currentIndex || order.status === 'Completed' ? 'done' : i === currentIndex ? 'current' : 'todo';
+        return (
+          <li key={step} className={'timeline-step ' + state}>
+            <span className="timeline-dot">{state === 'todo' ? i + 1 : '✓'}</span>
+            <span className="timeline-label">{stepLabel(step, order.delivery_type)}</span>
+            <small>{reachedAt[step] ? formatTime(reachedAt[step]) : ''}</small>
+          </li>
+        );
+      })}
+    </ol>
+  );
 }
 
 function MyOrders() {
@@ -16,9 +65,12 @@ function MyOrders() {
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(true);
   const [error, setError] = useState('');
-  const [placedId] = useState(() => new URLSearchParams(window.location.search).get('placed'));
+  const [notice, setNotice] = useState(() => {
+    const placed = new URLSearchParams(window.location.search).get('placed');
+    return placed ? 'Order #' + placed + ' has been placed. You can follow its progress below.' : '';
+  });
 
-  useEffect(() => {
+  const loadOrders = useCallback(() => {
     fetch(API + '/orders/my_orders.php', { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
@@ -34,13 +86,37 @@ function MyOrders() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
+
+  const cancelOrder = (order) => {
+    if (!window.confirm('Cancel order #' + order.order_id + '?')) return;
+    fetch(API + '/orders/cancel_my_order.php', {
+      credentials: 'include',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: order.order_id })
+    })
+      .then(res => res.json())
+      .then(result => {
+        setError(result.success ? '' : result.message);
+        setNotice(result.success ? 'Order #' + order.order_id + ' has been cancelled.' : '');
+        loadOrders();
+      })
+      .catch(() => setError('Cannot connect to server.'));
+  };
+
+  const canCancel = (order) =>
+    ['Awaiting Payment', 'Pending'].includes(order.status) && order.payment_status !== 'Paid';
+
   return (
     <PageShell>
       <div className="my-orders">
         <h1>My Orders</h1>
-        {placedId && (
+        {notice && (
           <div className="notice-bar success">
-            <span>Order #{placedId} has been placed. You can follow its progress below.</span>
+            <span>{notice}</span>
           </div>
         )}
 
@@ -67,9 +143,14 @@ function MyOrders() {
               <div className="order-meta">
                 {order.delivery_type === 'Pickup' ? 'Self pickup' : 'Home delivery'}
                 {' · '}
-                {{ Stripe: 'Paid online', COD: 'Cash on delivery', PayAtStore: 'Pay at store' }[order.payment_method] || order.payment_method}
-                {order.slot_date && <> · {order.slot_date} {order.slot_time}</>}
+                {order.payment_status === 'Paid'
+                  ? (order.payment_method === 'Stripe' ? 'Paid online' : 'Paid')
+                  : PAYMENT_LABELS[order.payment_method] || order.payment_method}
+                {order.slot_date && <> · {order.delivery_type === 'Pickup' ? 'Pickup' : 'Delivery'} {order.slot_date} {order.slot_time}</>}
               </div>
+
+              <OrderTimeline order={order} />
+
               <table className="order-items">
                 <tbody>
                   {order.items.map((item, i) => (
@@ -100,6 +181,11 @@ function MyOrders() {
                 <div className="order-delivery">
                   🚚 <strong>{order.customer_name}</strong>, {order.customer_phone}<br />
                   {order.customer_address}
+                </div>
+              )}
+              {canCancel(order) && (
+                <div className="order-actions">
+                  <button className="btn btn-ghost btn-sm" onClick={() => cancelOrder(order)}>Cancel order</button>
                 </div>
               )}
             </div>
