@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Stars } from './Stars';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -13,11 +14,20 @@ function ProductModal({ product, icon, inCartQty, onAdd, onClose }) {
   const maxQty = Math.max(0, product.stock - inCartQty);
   const image = productImageUrl(product);
 
+  const [reviews, setReviews] = useState(null);
+
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
+
+  useEffect(() => {
+    fetch(API + '/reviews/get_reviews.php?product_id=' + product.product_id)
+      .then(res => res.json())
+      .then(result => { if (result.success) setReviews(result.data); })
+      .catch(() => {});
+  }, [product.product_id]);
 
   const add = () => {
     onAdd(product, qty);
@@ -60,6 +70,35 @@ function ProductModal({ product, icon, inCartQty, onAdd, onClose }) {
             </div>
           )}
           {inCartQty > 0 && <span className="in-cart">✓ {inCartQty} already in cart</span>}
+
+          <div className="modal-reviews">
+            <h3>Customer reviews</h3>
+            {!reviews ? (
+              <p className="hint">Loading reviews...</p>
+            ) : reviews.review_count === 0 ? (
+              <p className="hint">No reviews yet. Customers can review this product after their order is completed.</p>
+            ) : (
+              <>
+                <div className="review-summary">
+                  <strong>{reviews.avg_rating.toFixed(1)}</strong>
+                  <Stars value={reviews.avg_rating} size="md" />
+                  <span>{reviews.review_count} review{reviews.review_count === 1 ? '' : 's'}</span>
+                </div>
+                <ul className="review-list">
+                  {reviews.reviews.map((r, i) => (
+                    <li key={i}>
+                      <div className="review-head">
+                        <Stars value={r.rating} />
+                        <strong>{r.reviewer}</strong>
+                        <small>{r.created_at.slice(0, 10)}</small>
+                      </div>
+                      {r.comment && <p>{r.comment}</p>}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

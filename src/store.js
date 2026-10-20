@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import './App.css';
 import CustomerAuth from './CustomerAuth';
+import { Stars } from './Stars';
 import { SiteFooter, WhatsAppButton } from './Layout';
 import ProductModal, { productImageUrl } from './ProductModal';
 import { loadSavedBranch, saveBranch, loadSavedCart, saveCart, clearSavedCart, rebuildCart } from './cartStorage';
@@ -238,6 +239,11 @@ function Store() {
         <div className="product-info">
           <span className="product-category">{product.category}</span>
           <h3 className="clickable" onClick={() => setDetailProduct(product)}>{product.name}</h3>
+          {Number(product.review_count) > 0 && (
+            <span className="card-rating">
+              <Stars value={product.avg_rating} /> {Number(product.avg_rating).toFixed(1)} ({product.review_count})
+            </span>
+          )}
           <div className="product-bottom">
             <span className="price-block">
               <span className={'price' + (product.on_sale ? ' sale' : '')}>{rm(product.unit_price)}</span>

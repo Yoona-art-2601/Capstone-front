@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import { productIcon } from './store';
 import { PageShell } from './Layout';
+import { Stars, StarInput } from './Stars';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -57,6 +58,78 @@ function OrderTimeline({ order }) {
         );
       })}
     </ol>
+  );
+}
+
+function ReviewItem({ order, item, onSaved }) {
+  const [open, setOpen] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  if (item.my_rating) {
+    return (
+      <li className="review-item">
+        <span className="review-item-name">{item.name}</span>
+        <span className="review-done">
+          <Stars value={item.my_rating} /> Reviewed
+          {item.my_comment && <small>“{item.my_comment}”</small>}
+        </span>
+      </li>
+    );
+  }
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (!rating) {
+      setError('Please choose a star rating.');
+      return;
+    }
+    setSaving(true);
+    fetch(API + '/reviews/add_review.php', {
+      credentials: 'include',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: order.order_id, product_id: item.product_id, rating, comment })
+    })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success) {
+          onSaved();
+        } else {
+          setError(result.message);
+          setSaving(false);
+        }
+      })
+      .catch(() => {
+        setError('Cannot connect to server.');
+        setSaving(false);
+      });
+  };
+
+  return (
+    <li className="review-item">
+      <span className="review-item-name">{item.name}</span>
+      {!open ? (
+        <button className="btn btn-ghost btn-sm" onClick={() => setOpen(true)}>Rate</button>
+      ) : (
+        <form className="review-form" onSubmit={submit}>
+          <StarInput value={rating} onChange={(n) => { setRating(n); setError(''); }} />
+          <textarea
+            rows={2} maxLength={1000} placeholder="What did you think? (optional)"
+            value={comment} onChange={(e) => setComment(e.target.value)}
+          />
+          {error && <div className="auth-error">{error}</div>}
+          <div className="review-form-actions">
+            <button type="button" className="link-button" onClick={() => setOpen(false)}>Cancel</button>
+            <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>
+              {saving ? 'Saving...' : 'Submit review'}
+            </button>
+          </div>
+        </form>
+      )}
+    </li>
   );
 }
 
@@ -181,6 +254,16 @@ function MyOrders() {
                 <div className="order-delivery">
                   🚚 <strong>{order.customer_name}</strong>, {order.customer_phone}<br />
                   {order.customer_address}
+                </div>
+              )}
+              {order.status === 'Completed' && (
+                <div className="review-section">
+                  <h3>Rate your items</h3>
+                  <ul>
+                    {order.items.map(item => (
+                      <ReviewItem key={item.product_id} order={order} item={item} onSaved={loadOrders} />
+                    ))}
+                  </ul>
                 </div>
               )}
               {canCancel(order) && (

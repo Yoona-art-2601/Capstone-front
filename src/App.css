@@ -524,3 +524,34 @@ h3.clickable:hover { color: var(--green-700); text-decoration: underline; }
   .timeline-label { font-size: 12px; }
   .timeline-step small { font-size: 11px; }
 }
+
+.stars { display: inline-flex; letter-spacing: 1px; line-height: 1; }
+.stars .on { color: #e8a317; }
+.stars .off { color: #d6d3c8; }
+.stars-md { font-size: 20px; }
+.card-rating { display: flex; align-items: center; gap: 6px; margin: -6px 0 10px; font-size: 13px; color: var(--muted); }
+.star-input { display: flex; align-items: center; gap: 2px; }
+.star-input button { background: none; border: none; font-size: 28px; line-height: 1; cursor: pointer; padding: 0 2px; }
+.star-input button.on { color: #e8a317; }
+.star-input button.off { color: #d6d3c8; }
+.star-input-label { margin-left: 8px; font-size: 14px; color: var(--muted); font-weight: 700; }
+.review-section { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--border); }
+.review-section h3 { margin: 0 0 8px; font-size: 15px; }
+.review-section ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.review-item { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.review-item-name { font-weight: 600; padding-top: 6px; }
+.review-done { display: grid; justify-items: end; gap: 2px; font-size: 13px; color: var(--green-700); font-weight: 700; }
+.review-done small { color: var(--muted); font-weight: 400; max-width: 320px; text-align: right; }
+.review-form { flex: 1 1 100%; display: grid; gap: 8px; background: var(--green-50); padding: 12px 14px; border-radius: 10px; }
+.review-form textarea { padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px; font: inherit; font-size: 14px; resize: vertical; }
+.review-form-actions { display: flex; justify-content: flex-end; gap: 14px; align-items: center; }
+.modal-reviews { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); display: grid; gap: 10px; }
+.modal-reviews h3 { margin: 0; font-size: 16px; }
+.review-summary { display: flex; align-items: center; gap: 10px; }
+.review-summary strong { font-size: 26px; color: var(--green-900); }
+.review-summary span { color: var(--muted); font-size: 14px; }
+.review-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; max-height: 220px; overflow-y: auto; }
+.review-list li { display: grid; gap: 4px; }
+.review-head { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.review-head small { color: var(--muted); }
+.review-list p { margin: 0; font-size: 14px; color: var(--text); }
