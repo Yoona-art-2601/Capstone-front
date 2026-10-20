@@ -15,6 +15,12 @@ const ACTION_CLASS = {
   THRESHOLD_UPDATE: 'stock',
   PRODUCT_ADD: 'product',
   PRODUCT_UPDATE: 'product',
+  PRODUCT_IMAGE: 'product',
+  ORDER_CANCEL: 'order',
+  FACTORY_RECEIPT: 'stock',
+  WAREHOUSE_DISPATCH: 'stock',
+  WAREHOUSE_RECEIVED: 'stock',
+  WAREHOUSE_DISPATCH_CANCEL: 'danger',
 };
 
 function AuditTrail() {

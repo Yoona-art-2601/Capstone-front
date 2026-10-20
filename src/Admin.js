@@ -3,6 +3,7 @@ import './Admin.css';
 import Orders from './Orders';
 import Inventory from './Inventory';
 import Transfers from './Transfers'
+import Warehouse from './Warehouse';
 import Dashboard from './Dashboard';
 import Login from './Login';
 import NotificationBell from './NotificationBell';
@@ -14,6 +15,7 @@ const TABS = [
   { key: 'orders', label: 'Orders' },
   { key: 'inventory', label: 'Inventory' },
   { key: 'transfers', label: 'Stock Transfers' },
+  { key: 'warehouse', label: 'Warehouse' },
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'audit', label: 'Audit Trail' },
 ];
@@ -115,6 +117,9 @@ function AdminPanel({ user, onLogout }) {
         )}
         {tab === 'transfers' && (
           <Transfers branchId={branchId} onChange={() => setRefreshKey(k => k + 1)} />
+        )}
+        {tab === 'warehouse' && (
+          <Warehouse branches={branches} onChange={() => setRefreshKey(k => k + 1)} />
         )}
         {tab === 'dashboard' && <Dashboard branchId={branchId} />}
         {tab === 'audit' && <AuditTrail />}

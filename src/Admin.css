@@ -105,3 +105,11 @@ button.danger { color: #dc3545; }
 .sale-edit { display: grid; gap: 4px; }
 .sale-edit label { display: flex; gap: 4px; align-items: center; font-size: 12px; color: #555; }
 .sale-edit input[type="date"] { font-size: 12px; padding: 2px 4px; }
+
+.wh-forms { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.wh-forms .form-box { margin-bottom: 0; }
+.wh-forms .form-grid { display: grid; grid-template-columns: 1fr 1fr; }
+.wh-forms .form-grid label { font-size: 12px; }
+.wh-forms .form-grid select, .wh-forms .form-grid input { width: 100%; box-sizing: border-box; }
+.wh-title { margin: 28px 0 10px; }
+@media (max-width: 1000px) { .wh-forms { grid-template-columns: 1fr; } }
