@@ -113,3 +113,14 @@ button.danger { color: #dc3545; }
 .wh-forms .form-grid select, .wh-forms .form-grid input { width: 100%; box-sizing: border-box; }
 .wh-title { margin: 28px 0 10px; }
 @media (max-width: 1000px) { .wh-forms { grid-template-columns: 1fr; } }
+
+.sales-history { margin-top: 20px; }
+.sales-history-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.sales-history-head h3 { margin: 0; }
+.sales-history-actions { display: flex; gap: 8px; }
+.sales-history-actions button { background: #2d6a45; color: white; border: none; border-radius: 4px; padding: 8px 14px; cursor: pointer; font-weight: bold; }
+.sales-history-actions button:disabled { opacity: 0.6; }
+.sales-history-filters { flex-wrap: wrap; margin-top: 12px; }
+.sales-history-filters input[type="date"] { padding: 4px 6px; }
+.share-bar { width: 80px; height: 6px; background: #e5e5e5; border-radius: 3px; overflow: hidden; display: inline-block; margin-right: 6px; vertical-align: middle; }
+.share-bar span { display: block; height: 100%; background: #2d6a45; }

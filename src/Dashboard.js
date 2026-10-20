@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
+import SalesHistory from './SalesHistory';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -199,6 +200,8 @@ function Dashboard({ branchId }) {
           </tbody>
         </table>
       </div>
+
+      <SalesHistory branchId={branchId} />
     </div>
   );
 }
