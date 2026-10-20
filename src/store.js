@@ -274,9 +274,10 @@ function Store() {
 
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const cartSubtotal = cart.reduce((sum, item) => sum + item.unit_price * item.quantity, 0);
-  const deliveryFee = !settings || cartSubtotal >= settings.free_delivery_threshold ? 0 : settings.delivery_fee;
+  const sstRate = settings ? settings.sst_rate : 0.06;
+  const cartSst = Math.round(cartSubtotal * sstRate * 100) / 100;
   const amountToFree = settings ? settings.free_delivery_threshold - cartSubtotal : 0;
-  const cartTotal = cartSubtotal + deliveryFee;
+  const cartTotal = cartSubtotal + cartSst;
 
   return (
     <div className="store">
@@ -438,10 +439,14 @@ function Store() {
                   <span>{rm(cartSubtotal)}</span>
                 </div>
                 <div className="summary-row">
+                  <span>SST ({Math.round(sstRate * 100)}%)</span>
+                  <span>{rm(cartSst)}</span>
+                </div>
+                <div className="summary-row">
                   <span>Delivery</span>
-                  {deliveryFee === 0
+                  {settings && amountToFree <= 0
                     ? <span className="free">FREE</span>
-                    : <span>{rm(deliveryFee)}</span>}
+                    : <span className="muted">At checkout</span>}
                 </div>
                 {settings && amountToFree > 0 && (
                   <div className="free-progress">
@@ -457,12 +462,12 @@ function Store() {
               </div>
 
               <div className="cart-total">
-                <span>Total</span>
+                <span>Total{settings && amountToFree > 0 ? ' (before delivery)' : ''}</span>
                 <strong>{rm(cartTotal)}</strong>
               </div>
 
               <a href="/cart" className="btn btn-primary btn-block">Checkout</a>
-              <small className="secure-note">Enter delivery details and pay on the next page</small>
+              <small className="secure-note">Login, choose delivery or pickup, and pay on the next page</small>
             </>
           )}
         </aside>

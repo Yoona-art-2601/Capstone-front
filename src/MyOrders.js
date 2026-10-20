@@ -7,7 +7,7 @@ const API = 'http://localhost/beaconmart-project/backend';
 
 function statusLabel(order) {
   if (order.status === 'Cancelled') return { text: 'Cancelled', cls: 'cancelled' };
-  if (order.payment_status !== 'Paid') return { text: 'Awaiting Payment', cls: 'unpaid' };
+  if (order.status === 'Awaiting Payment') return { text: 'Awaiting Payment', cls: 'unpaid' };
   return { text: order.status, cls: order.status.toLowerCase() };
 }
 
@@ -16,6 +16,7 @@ function MyOrders() {
   const [loading, setLoading] = useState(true);
   const [loggedIn, setLoggedIn] = useState(true);
   const [error, setError] = useState('');
+  const [placedId] = useState(() => new URLSearchParams(window.location.search).get('placed'));
 
   useEffect(() => {
     fetch(API + '/orders/my_orders.php', { credentials: 'include' })
@@ -37,6 +38,11 @@ function MyOrders() {
     <PageShell>
       <div className="my-orders">
         <h1>My Orders</h1>
+        {placedId && (
+          <div className="notice-bar success">
+            <span>Order #{placedId} has been placed. You can follow its progress below.</span>
+          </div>
+        )}
 
         {loading && <p className="message">Loading...</p>}
         {error && <p className="auth-error">{error}</p>}
@@ -58,6 +64,12 @@ function MyOrders() {
               <div className="order-meta">
                 {order.order_date} &middot; 📍 {order.branch_name || '-'}
               </div>
+              <div className="order-meta">
+                {order.delivery_type === 'Pickup' ? 'Self pickup' : 'Home delivery'}
+                {' · '}
+                {{ Stripe: 'Paid online', COD: 'Cash on delivery', PayAtStore: 'Pay at store' }[order.payment_method] || order.payment_method}
+                {order.slot_date && <> · {order.slot_date} {order.slot_time}</>}
+              </div>
               <table className="order-items">
                 <tbody>
                   {order.items.map((item, i) => (
@@ -66,8 +78,14 @@ function MyOrders() {
                       <td className="num">RM {Number(item.subtotal).toFixed(2)}</td>
                     </tr>
                   ))}
+                  {Number(order.sst_amount) > 0 && (
+                    <tr className="order-sub">
+                      <td>SST</td>
+                      <td className="num">RM {Number(order.sst_amount).toFixed(2)}</td>
+                    </tr>
+                  )}
                   <tr className="order-sub">
-                    <td>Delivery</td>
+                    <td>{order.delivery_type === 'Pickup' ? 'Self pickup' : 'Delivery'}{order.distance_km ? ' (' + Number(order.distance_km).toFixed(1) + ' km)' : ''}</td>
                     <td className="num">
                       {Number(order.delivery_fee) > 0 ? 'RM ' + Number(order.delivery_fee).toFixed(2) : 'FREE'}
                     </td>

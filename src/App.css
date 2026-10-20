@@ -451,3 +451,50 @@ h3.clickable:hover { color: var(--green-700); text-decoration: underline; }
   .cart-page { grid-template-columns: 1fr; }
   .cart-page-side { position: static; }
 }
+
+.cart-page-main { display: grid; gap: 18px; min-width: 0; }
+.checkout-sections { display: grid; gap: 18px; }
+.checkout-section {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 20px 24px; display: grid; gap: 14px;
+}
+.checkout-section h3 { margin: 0; font-size: 17px; }
+.login-gate p { margin: 0; color: var(--muted); }
+.login-gate .btn { justify-self: start; }
+.choice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.choice {
+  display: grid; gap: 4px; padding: 14px 16px; border: 2px solid var(--border); border-radius: 12px;
+  cursor: pointer; position: relative; transition: border-color 0.15s, background 0.15s;
+}
+.choice input { position: absolute; opacity: 0; pointer-events: none; }
+.choice strong { font-size: 15px; }
+.choice small { color: var(--muted); font-size: 13px; line-height: 1.4; }
+.choice.active { border-color: var(--green-700); background: var(--green-50); }
+.choice:hover { border-color: var(--green-600); }
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
+.field-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 700; color: var(--muted); }
+.field-grid .span-2 { grid-column: span 2; }
+.field-grid input, .field-grid select {
+  padding: 10px 12px; border: 1px solid var(--border); border-radius: 10px;
+  font: inherit; font-size: 14px; color: var(--text); background: var(--surface); box-sizing: border-box; width: 100%;
+}
+.field-grid input:focus, .field-grid select:focus { outline: none; border-color: var(--green-600); box-shadow: 0 0 0 3px var(--green-100); }
+.checkbox { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--text); cursor: pointer; }
+.date-row, .slot-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.date-chip, .slot-chip {
+  border: 1px solid var(--border); background: var(--surface); border-radius: 999px;
+  padding: 8px 14px; font: inherit; font-size: 14px; cursor: pointer;
+}
+.date-chip.active, .slot-chip.active { background: var(--green-900); border-color: var(--green-900); color: white; }
+.date-chip:hover, .slot-chip:hover { border-color: var(--green-600); }
+.hint { margin: 0; font-size: 13px; color: var(--muted); }
+.summary-row .distance { font-size: 12px; color: var(--muted); font-weight: 400; }
+.summary-row .muted { color: var(--muted); font-weight: 400; }
+.cart-page-summary .auth-error { margin-top: 6px; }
+.cart-page-summary > .btn-block { margin-top: 8px; }
+.cart-page-summary > .secure-note { display: block; margin-top: 8px; text-align: center; }
+
+@media (max-width: 640px) {
+  .choice-grid, .field-grid { grid-template-columns: 1fr; }
+  .field-grid .span-2 { grid-column: auto; }
+}
