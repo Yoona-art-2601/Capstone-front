@@ -2,6 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
+function nowStamp() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+}
+
 function post(path, body) {
   return fetch(API + path, {
     credentials: 'include',
@@ -114,7 +120,9 @@ function ProductRow({ product, branchId, onDone }) {
       name: product.name,
       category: product.category || '',
       price: product.price,
-      sale_price: product.sale_price === null ? '' : product.sale_price,
+      sale_price: product.sale_price_set === null || product.sale_price_set === undefined ? '' : product.sale_price_set,
+      sale_start: product.sale_start ? product.sale_start.slice(0, 10) : '',
+      sale_end: product.sale_end ? product.sale_end.slice(0, 10) : '',
       low_stock_threshold: product.low_stock_threshold
     });
     setEditing(true);
@@ -131,7 +139,9 @@ function ProductRow({ product, branchId, onDone }) {
         name: form.name,
         category: form.category,
         price: form.price,
-        sale_price: form.sale_price === '' ? null : form.sale_price
+        sale_price: form.sale_price === '' ? null : form.sale_price,
+        sale_start: form.sale_start || null,
+        sale_end: form.sale_end || null
       });
       if (!r1.success) {
         onDone('Error: ' + r1.message);
@@ -227,12 +237,26 @@ function ProductRow({ product, branchId, onDone }) {
       </td>
       <td>
         {editing ? (
-          <input type="number" step="0.01" min="0" className="narrow" placeholder="None" value={form.sale_price}
-            onChange={(e) => setForm({ ...form, sale_price: e.target.value })} />
+          <div className="sale-edit">
+            <input type="number" step="0.01" min="0" className="narrow" placeholder="None" value={form.sale_price}
+              onChange={(e) => setForm({ ...form, sale_price: e.target.value })} />
+            <label>From <input type="date" value={form.sale_start} onChange={(e) => setForm({ ...form, sale_start: e.target.value })} /></label>
+            <label>To <input type="date" value={form.sale_end} onChange={(e) => setForm({ ...form, sale_end: e.target.value })} /></label>
+          </div>
         ) : onSale ? (
           <>
             {Number(product.sale_price).toFixed(2)}{' '}
             <span className="pill sale">-{Math.round((1 - product.sale_price / product.price) * 100)}%</span>
+            {product.sale_end && <><br /><small>until {product.sale_end.slice(0, 10)}</small></>}
+          </>
+        ) : product.sale_price_set !== null && product.sale_price_set !== undefined ? (
+          <>
+            {Number(product.sale_price_set).toFixed(2)}{' '}
+            <span className="pill unpaid">{product.sale_start && product.sale_start > nowStamp() ? 'Scheduled' : 'Ended'}</span>
+            <br />
+            <small>
+              {product.sale_start ? product.sale_start.slice(0, 10) : 'now'} to {product.sale_end ? product.sale_end.slice(0, 10) : 'no end'}
+            </small>
           </>
         ) : '-'}
       </td>

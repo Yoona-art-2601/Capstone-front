@@ -53,7 +53,24 @@ export function withPricing(product) {
 function stockBadge(stock) {
   if (stock <= 0) return { text: 'Out of stock', cls: 'out' };
   if (stock <= 5) return { text: 'Only ' + stock + ' left', cls: 'low' };
-  return { text: 'In stock', cls: 'ok' };
+  return { text: stock + ' in stock', cls: 'ok' };
+}
+
+const byCategoryName = (a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name);
+
+const SORTERS = {
+  featured: byCategoryName,
+  price_asc: (a, b) => a.unit_price - b.unit_price || byCategoryName(a, b),
+  price_desc: (a, b) => b.unit_price - a.unit_price || byCategoryName(a, b),
+  newest: (a, b) => (b.created_at || '').localeCompare(a.created_at || '') || b.product_id - a.product_id,
+  best_selling: (a, b) => Number(b.sold) - Number(a.sold) || byCategoryName(a, b),
+  top_rated: (a, b) => (Number(b.avg_rating) || 0) - (Number(a.avg_rating) || 0) || Number(b.review_count) - Number(a.review_count) || byCategoryName(a, b)
+};
+
+function formatEnd(value) {
+  if (!value) return '';
+  const d = new Date(value.replace(' ', 'T'));
+  return d.toLocaleDateString('en-MY', { day: 'numeric', month: 'short' });
 }
 
 function Store() {
@@ -67,6 +84,11 @@ function Store() {
   const [cart, setCart] = useState([]);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
+  const [sortBy, setSortBy] = useState('featured');
+  const [inStockOnly, setInStockOnly] = useState(false);
+  const [onSaleOnly, setOnSaleOnly] = useState(false);
+  const [priceMin, setPriceMin] = useState('');
+  const [priceMax, setPriceMax] = useState('');
   const [notice, setNotice] = useState(null);
   const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
@@ -163,12 +185,28 @@ function Store() {
     [products]
   );
 
+  const minPrice = priceMin === '' ? null : Number(priceMin);
+  const maxPrice = priceMax === '' ? null : Number(priceMax);
+  const filtersActive = sortBy !== 'featured' || inStockOnly || onSaleOnly || minPrice !== null || maxPrice !== null;
+
   const visibleProducts = products
     .filter(p =>
       (category === 'All' || (category === PROMOTIONS ? p.on_sale : p.category === category)) &&
-      p.name.toLowerCase().includes(search.trim().toLowerCase())
+      p.name.toLowerCase().includes(search.trim().toLowerCase()) &&
+      (!inStockOnly || p.stock > 0) &&
+      (!onSaleOnly || p.on_sale) &&
+      (minPrice === null || p.unit_price >= minPrice) &&
+      (maxPrice === null || p.unit_price <= maxPrice)
     )
-    .sort((a, b) => (a.category || '').localeCompare(b.category || '') || a.name.localeCompare(b.name));
+    .sort(SORTERS[sortBy] || SORTERS.featured);
+
+  const clearFilters = () => {
+    setSortBy('featured');
+    setInStockOnly(false);
+    setOnSaleOnly(false);
+    setPriceMin('');
+    setPriceMax('');
+  };
 
   const branchName = (branches.find(b => b.branch_id === branchId) || {}).branch_name || '';
 
@@ -196,7 +234,7 @@ function Store() {
     return item ? item.quantity : 0;
   };
 
-  const showCollections = category === 'All' && !search.trim();
+  const showCollections = category === 'All' && !search.trim() && !filtersActive;
 
   const collections = [
     {
@@ -249,6 +287,7 @@ function Store() {
               <span className={'price' + (product.on_sale ? ' sale' : '')}>{rm(product.unit_price)}</span>
               {product.on_sale && <span className="price-old">{rm(product.price)}</span>}
             </span>
+            {product.on_sale && product.sale_end && <span className="promo-end">Promo ends {formatEnd(product.sale_end)}</span>}
             <button
               className="btn btn-primary"
               onClick={() => addToCart(product)}
@@ -371,6 +410,37 @@ function Store() {
                   {c === 'All' ? 'All' : c === PROMOTIONS ? '🏷️ ' + c : categoryIcon(c) + ' ' + c}
                 </button>
               ))}
+            </div>
+            <div className="filter-bar">
+              <label>
+                Sort by
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
+                  <option value="featured">Featured</option>
+                  <option value="price_asc">Price: low to high</option>
+                  <option value="price_desc">Price: high to low</option>
+                  <option value="newest">Newest</option>
+                  <option value="best_selling">Best selling</option>
+                  <option value="top_rated">Top rated</option>
+                </select>
+              </label>
+              <label className="price-range">
+                Price (RM)
+                <span>
+                  <input type="number" min="0" placeholder="Min" value={priceMin} onChange={(e) => setPriceMin(e.target.value)} />
+                  <span>–</span>
+                  <input type="number" min="0" placeholder="Max" value={priceMax} onChange={(e) => setPriceMax(e.target.value)} />
+                </span>
+              </label>
+              <label className="toggle">
+                <input type="checkbox" checked={inStockOnly} onChange={(e) => setInStockOnly(e.target.checked)} />
+                In stock only
+              </label>
+              <label className="toggle">
+                <input type="checkbox" checked={onSaleOnly} onChange={(e) => setOnSaleOnly(e.target.checked)} />
+                On sale only
+              </label>
+              {filtersActive && <button className="link-button" onClick={clearFilters}>Clear filters</button>}
+              <span className="result-count">{visibleProducts.length} product{visibleProducts.length === 1 ? '' : 's'}</span>
             </div>
           </div>
 

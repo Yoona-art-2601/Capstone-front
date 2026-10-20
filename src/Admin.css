@@ -101,3 +101,7 @@ button.danger { color: #dc3545; }
 .details-description { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
 .details-description label { display: flex; flex-direction: column; gap: 6px; width: 100%; font-weight: bold; font-size: 13px; }
 .details-description textarea { width: 100%; box-sizing: border-box; padding: 8px; font-family: inherit; font-size: 14px; font-weight: normal; }
+
+.sale-edit { display: grid; gap: 4px; }
+.sale-edit label { display: flex; gap: 4px; align-items: center; font-size: 12px; color: #555; }
+.sale-edit input[type="date"] { font-size: 12px; padding: 2px 4px; }

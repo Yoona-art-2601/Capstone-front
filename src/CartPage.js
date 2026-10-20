@@ -134,7 +134,11 @@ function CartPage() {
   const itemsKey = cart.map(i => i.product_id + 'x' + i.quantity).join(',');
 
   useEffect(() => {
-    if (!user || cart.length === 0) {
+    const quoteItems = itemsKey === '' ? [] : itemsKey.split(',').map(pair => {
+      const [productId, quantity] = pair.split('x');
+      return { product_id: Number(productId), quantity: Number(quantity) };
+    });
+    if (!user || quoteItems.length === 0) {
       setQuote(null);
       return undefined;
     }
@@ -153,7 +157,7 @@ function CartPage() {
         city: form.city,
         state: form.state,
         postcode: form.postcode,
-        items: cart.map(item => ({ product_id: item.product_id, quantity: item.quantity }))
+        items: quoteItems
       })
         .then(result => {
           if (result.success) {
