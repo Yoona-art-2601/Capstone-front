@@ -5,7 +5,7 @@ import { Stars } from './Stars';
 import NotificationBell from './NotificationBell';
 import { SiteFooter, WhatsAppButton } from './Layout';
 import ProductModal, { productImageUrl } from './ProductModal';
-import { loadSavedBranch, saveBranch, loadSavedCart, saveCart, clearSavedCart, rebuildCart } from './cartStorage';
+import { loadSavedBranch, saveBranch, loadSavedCart, saveCart, rebuildCart } from './cartStorage';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -146,11 +146,8 @@ function Store() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const payment = params.get('payment');
-    if (payment === 'success') {
-      clearSavedCart();
-      showNotice('Payment successful! Order #' + params.get('order_id') + ' has been placed.', 'success');
-    } else if (payment === 'cancelled') {
-      showNotice('Payment cancelled. Your order was not placed.', 'error');
+    if (payment === 'cancelled') {
+      showNotice('Payment cancelled. Your order was not placed and your cart is still here.', 'error');
     }
     if (payment || params.get('branch')) {
       window.history.replaceState({}, '', '/');

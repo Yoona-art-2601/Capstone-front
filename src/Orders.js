@@ -141,7 +141,7 @@ function Orders({ branchId }) {
                   {order.slot_date && <><br /><small>{order.slot_date} {order.slot_time}</small></>}
                 </td>
                 <td>
-                  <span className={'pill ' + (order.payment_status === 'Paid' ? 'paid' : 'unpaid')}>
+                  <span className={'pill ' + (order.payment_status === 'Paid' ? 'paid' : order.payment_status === 'Refunded' ? 'cancelled' : 'unpaid')}>
                     {order.payment_status}
                   </span>
                   <br />

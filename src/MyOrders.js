@@ -3,6 +3,7 @@ import './App.css';
 import { productIcon } from './store';
 import { PageShell } from './Layout';
 import { Stars, StarInput } from './Stars';
+import { clearSavedCart } from './cartStorage';
 
 const API = 'http://localhost/beaconmart-project/backend';
 
@@ -139,9 +140,28 @@ function MyOrders() {
   const [loggedIn, setLoggedIn] = useState(true);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState(() => {
-    const placed = new URLSearchParams(window.location.search).get('placed');
-    return placed ? 'Order #' + placed + ' has been placed. You can follow its progress below.' : '';
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('placed')) {
+      return { type: 'success', text: 'Order #' + params.get('placed') + ' has been placed. You can follow its progress below.' };
+    }
+    if (params.get('refunded')) {
+      return { type: 'error', text: 'Order #' + params.get('refunded') + ' could not be completed because an item sold out. Your payment has been refunded.' };
+    }
+    if (params.get('payment') === 'pending') {
+      return { type: 'info', text: 'We have not received your payment yet. You can continue paying from the order below.' };
+    }
+    if (params.get('payment') === 'error') {
+      return { type: 'error', text: 'We could not confirm your payment. Please check your order below or contact the store.' };
+    }
+    return null;
   });
+  const [paying, setPaying] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('placed')) clearSavedCart();
+    if ([...params.keys()].length) window.history.replaceState({}, '', '/my-orders');
+  }, []);
 
   const loadOrders = useCallback(() => {
     fetch(API + '/orders/my_orders.php', { credentials: 'include' })
@@ -174,11 +194,39 @@ function MyOrders() {
       .then(res => res.json())
       .then(result => {
         setError(result.success ? '' : result.message);
-        setNotice(result.success ? 'Order #' + order.order_id + ' has been cancelled.' : '');
+        setNotice(result.success ? { type: 'success', text: 'Order #' + order.order_id + ' has been cancelled.' } : null);
         loadOrders();
       })
       .catch(() => setError('Cannot connect to server.'));
   };
+
+  const payNow = (order) => {
+    setPaying(order.order_id);
+    setError('');
+    fetch(API + '/payment/resume_payment.php', {
+      credentials: 'include',
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: order.order_id })
+    })
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && result.checkout_url) {
+          window.location.href = result.checkout_url;
+          return;
+        }
+        setPaying(null);
+        setNotice({ type: 'info', text: result.message });
+        loadOrders();
+      })
+      .catch(() => {
+        setPaying(null);
+        setError('Cannot connect to server.');
+      });
+  };
+
+  const canPay = (order) =>
+    order.status === 'Awaiting Payment' && order.payment_method === 'Stripe' && order.payment_status === 'Unpaid';
 
   const canCancel = (order) =>
     ['Awaiting Payment', 'Pending'].includes(order.status) && order.payment_status !== 'Paid';
@@ -188,8 +236,9 @@ function MyOrders() {
       <div className="my-orders">
         <h1>My Orders</h1>
         {notice && (
-          <div className="notice-bar success">
-            <span>{notice}</span>
+          <div className={'notice-bar ' + notice.type}>
+            <span>{notice.text}</span>
+            <button onClick={() => setNotice(null)} aria-label="Dismiss">×</button>
           </div>
         )}
 
@@ -216,9 +265,11 @@ function MyOrders() {
               <div className="order-meta">
                 {order.delivery_type === 'Pickup' ? 'Self pickup' : 'Home delivery'}
                 {' · '}
-                {order.payment_status === 'Paid'
-                  ? (order.payment_method === 'Stripe' ? 'Paid online' : 'Paid')
-                  : PAYMENT_LABELS[order.payment_method] || order.payment_method}
+                {order.payment_status === 'Refunded'
+                  ? 'Refunded'
+                  : order.payment_status === 'Paid'
+                    ? (order.payment_method === 'Stripe' ? 'Paid online' : 'Paid')
+                    : PAYMENT_LABELS[order.payment_method] || order.payment_method}
                 {order.slot_date && <> · {order.delivery_type === 'Pickup' ? 'Pickup' : 'Delivery'} {order.slot_date} {order.slot_time}</>}
               </div>
 
@@ -266,9 +317,19 @@ function MyOrders() {
                   </ul>
                 </div>
               )}
-              {canCancel(order) && (
+              {(canPay(order) || canCancel(order)) && (
                 <div className="order-actions">
-                  <button className="btn btn-ghost btn-sm" onClick={() => cancelOrder(order)}>Cancel order</button>
+                  {canPay(order) && order.pay_before && (
+                    <span className="pay-before">Pay before {formatTime(order.pay_before)}</span>
+                  )}
+                  {canCancel(order) && (
+                    <button className="btn btn-ghost btn-sm" onClick={() => cancelOrder(order)}>Cancel order</button>
+                  )}
+                  {canPay(order) && (
+                    <button className="btn btn-primary btn-sm" onClick={() => payNow(order)} disabled={paying === order.order_id}>
+                      {paying === order.order_id ? 'Opening payment...' : 'Pay now'}
+                    </button>
+                  )}
                 </div>
               )}
             </div>

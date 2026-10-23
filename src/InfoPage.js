@@ -76,14 +76,31 @@ function DeliveryPolicy({ settings }) {
         <h2>Delivery charges</h2>
         {settings ? (
           <ul>
-            <li>FREE delivery for orders of {rm(settings.free_delivery_threshold)} and above.</li>
-            <li>A flat delivery fee of {rm(settings.delivery_fee)} applies to orders below {rm(settings.free_delivery_threshold)}.</li>
+            <li>FREE delivery for orders of {rm(settings.free_delivery_threshold)} and above (before SST).</li>
+            <li>
+              Below that, delivery costs {rm(settings.delivery_base_fee)} for the first {settings.delivery_base_km} km
+              from the branch, plus {rm(settings.delivery_per_km)} for every extra km.
+            </li>
+            <li>We deliver up to {settings.delivery_max_km} km from the branch. For addresses further away, choose another branch or self pickup.</li>
+            <li>The exact fee is calculated from your address at checkout, before you pay.</li>
+            <li>{Math.round(settings.sst_rate * 100)}% SST is added to the product total and shown separately at checkout.</li>
           </ul>
         ) : <p>Loading...</p>}
+        <h2>Delivery or self pickup</h2>
+        <ul>
+          <li>Home delivery: pay online by card, or cash on delivery.</li>
+          <li>Self pickup at the branch: no delivery fee. Pay online by card, or pay at the store when you collect.</li>
+        </ul>
+        <h2>Time slots</h2>
+        <p>
+          Choose a 2-hour delivery or pickup slot at checkout, up to a week ahead.
+          {settings && ' Same-day slots are only available for orders placed before ' + settings.same_day_cutoff + '.'}
+          {' '}Branches are closed on Sundays.
+        </p>
         <h2>Fulfilment</h2>
         <p>
-          Each order is prepared by the branch you selected at checkout, using that branch's stock. Delivery is
-          arranged once payment is confirmed and the order moves to Processing.
+          Each order is prepared by the branch you selected at checkout, using that branch's stock. You can follow
+          every step, from order placed to delivered or picked up, in My Orders.
         </p>
         <h2>Delivery details</h2>
         <p>
@@ -95,7 +112,7 @@ function DeliveryPolicy({ settings }) {
   );
 }
 
-function RefundPolicy() {
+function RefundPolicy({ settings }) {
   return (
     <>
       <h1>Return &amp; Refund Policy</h1>
@@ -112,7 +129,10 @@ function RefundPolicy() {
         </p>
         <h2>Unpaid orders</h2>
         <p>
-          If you leave the payment page without paying, the order is not placed and no stock is reserved.
+          Online payments must be completed within {settings ? settings.payment_window_minutes : 30} minutes. You can
+          continue an unfinished payment from My Orders. After that time the order is cancelled automatically. Stock
+          is not reserved until payment is received, and if an item sells out before your payment arrives, the order
+          is cancelled and your payment is refunded in full.
         </p>
       </div>
     </>
