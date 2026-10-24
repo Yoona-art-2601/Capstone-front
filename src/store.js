@@ -402,7 +402,7 @@ function Store() {
           {user ? (
             <>
               <NotificationBell />
-              <span className="greeting">Hi, {user.name}</span>
+              <a href="/account" className="greeting" title="My account">Hi, {user.name}</a>
               <a href="/my-orders" className="btn btn-ghost">My Orders</a>
               <button className="btn btn-ghost" onClick={handleLogout}>Logout</button>
             </>

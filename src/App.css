@@ -572,6 +572,18 @@ h3.clickable:hover { color: var(--green-700); text-decoration: underline; }
 .filter-bar .result-count { margin-left: auto; padding-bottom: 8px; font-size: 14px; color: var(--muted); }
 .promo-end { font-size: 12px; font-weight: 700; color: var(--red); }
 
+.account-page { display: grid; gap: 18px; max-width: 640px; }
+.account-page h1 { margin-bottom: 0; }
+.account-page .btn { justify-self: start; }
+.account-details { display: grid; grid-template-columns: max-content 1fr; gap: 8px 18px; margin: 0; font-size: 15px; }
+.account-details dt { color: var(--muted); font-weight: 700; }
+.account-details dd { margin: 0; }
+.account-links { display: flex; gap: 8px; flex-wrap: wrap; }
+.greeting { text-decoration: none; }
+.greeting:hover { text-decoration: underline; }
+.admin-user { text-decoration: none; }
+.admin-user:hover { text-decoration: underline; }
+
 .notif { position: relative; }
 .notif-button {
   position: relative; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;

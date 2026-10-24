@@ -104,7 +104,7 @@ function AdminPanel({ user, onLogout }) {
           )}
           <a href="/" className="admin-link">&larr; Back to store</a>
           <NotificationBell variant="admin" onOpenLink={openLink} />
-          <span className="admin-user">{user.name}</span>
+          <a href="/account" className="admin-user" title="My account and password">{user.name}</a>
           <button className="logout-btn" onClick={onLogout}>Logout</button>
         </div>
       </header>

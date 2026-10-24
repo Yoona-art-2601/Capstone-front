@@ -76,6 +76,7 @@ export function SiteFooter() {
           <a href="/">All Products</a>
           <a href="/stores">Where to Find Us</a>
           <a href="/my-orders">My Orders</a>
+          <a href="/account">My Account</a>
         </div>
         <div>
           <h4>Information</h4>
