@@ -599,6 +599,9 @@ h3.clickable:hover { color: var(--green-700); text-decoration: underline; }
 .notif-dot.out_of_stock { background: #c0392b; }
 .notif-dot.back_in_stock { background: #2d6a45; }
 .notif-dot.order_status { background: #2b5a9e; }
+.notif-dot.new_order { background: #2d6a45; }
+.notif-dot.order_cancelled, .notif-dot.refund_needed { background: #c0392b; }
+.notif-dot.payment_refunded { background: #8a6d3b; }
 .notif-text { display: grid; gap: 2px; font-size: 13px; }
 .notif-text strong { font-size: 14px; }
 .notif-text span { color: #4f5a54; line-height: 1.4; }

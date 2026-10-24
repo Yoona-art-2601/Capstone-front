@@ -11,14 +11,20 @@ function timeAgo(value) {
   return Math.round(hours / 24) + ' d ago';
 }
 
+const SCOPES = {
+  store: { scope: 'customer', title: 'My notifications', empty: 'No notifications yet. Updates about your orders and items you asked us to restock will appear here.' },
+  admin: { scope: 'admin', title: 'Admin alerts', empty: 'No alerts. New orders, cancellations, refunds and low stock will appear here.' }
+};
+
 function NotificationBell({ onOpenLink, variant = 'store' }) {
+  const { scope, title, empty } = SCOPES[variant] || SCOPES.store;
   const [items, setItems] = useState([]);
   const [unread, setUnread] = useState(0);
   const [open, setOpen] = useState(false);
   const boxRef = useRef(null);
 
   const load = useCallback(() => {
-    fetch(API + '/notifications/get_notifications.php', { credentials: 'include' })
+    fetch(API + '/notifications/get_notifications.php?scope=' + scope, { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
         if (result.success) {
@@ -27,7 +33,7 @@ function NotificationBell({ onOpenLink, variant = 'store' }) {
         }
       })
       .catch(() => {});
-  }, []);
+  }, [scope]);
 
   useEffect(() => {
     load();
@@ -47,7 +53,7 @@ function NotificationBell({ onOpenLink, variant = 'store' }) {
       credentials: 'include',
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify({ ...body, scope })
     }).then(load);
 
   const openItem = (item) => {
@@ -66,7 +72,7 @@ function NotificationBell({ onOpenLink, variant = 'store' }) {
       <button
         className="notif-button"
         onClick={() => { setOpen(!open); if (!open) load(); }}
-        aria-label={'Notifications' + (unread ? ', ' + unread + ' unread' : '')}
+        aria-label={title + (unread ? ', ' + unread + ' unread' : '')}
       >
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -77,11 +83,11 @@ function NotificationBell({ onOpenLink, variant = 'store' }) {
       {open && (
         <div className="notif-panel">
           <div className="notif-head">
-            <strong>Notifications</strong>
+            <strong>{title}</strong>
             {unread > 0 && <button className="notif-markall" onClick={() => markRead({ all: true })}>Mark all as read</button>}
           </div>
           {items.length === 0 ? (
-            <p className="notif-empty">No notifications yet.</p>
+            <p className="notif-empty">{empty}</p>
           ) : (
             <ul>
               {items.map(item => (
