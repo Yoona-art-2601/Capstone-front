@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-
-const API = 'http://localhost/beaconmart-project/backend';
+import { API } from './api';
 
 function Transfers({ branchId, onChange }) {
   const [branches, setBranches] = useState([]);

@@ -1,9 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Stars } from './Stars';
-
-const API = 'http://localhost/beaconmart-project/backend';
-
-const rm = (value) => 'RM ' + Number(value).toFixed(2);
+import { API, rm } from './api';
 
 export function productImageUrl(product) {
   return product.image_url ? API + '/' + product.image_url : null;

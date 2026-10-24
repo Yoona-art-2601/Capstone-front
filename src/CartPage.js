@@ -5,10 +5,7 @@ import CustomerAuth from './CustomerAuth';
 import { productImageUrl } from './ProductModal';
 import { productIcon, withPricing } from './store';
 import { loadSavedBranch, loadSavedCart, saveCart, clearSavedCart, rebuildCart, isValidPhone } from './cartStorage';
-
-const API = 'http://localhost/beaconmart-project/backend';
-
-const rm = (value) => 'RM ' + Number(value).toFixed(2);
+import { API, rm, postJSON } from './api';
 
 const PAYMENT_OPTIONS = {
   Delivery: [
@@ -20,15 +17,6 @@ const PAYMENT_OPTIONS = {
     { value: 'PayAtStore', label: 'Pay at the store', note: 'Pay when you collect your order' }
   ]
 };
-
-function postJSON(path, body) {
-  return fetch(API + path, {
-    credentials: 'include',
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  }).then(res => res.json());
-}
 
 function CartPage() {
   const branchId = useRef(loadSavedBranch() || 1).current;
@@ -232,7 +220,7 @@ function CartPage() {
         } else if (result.checkout_url) {
           window.location.href = result.checkout_url;
         } else {
-          clearSavedCart();
+          clearSavedCart(branchId);
           window.location.href = result.redirect_url;
         }
       })

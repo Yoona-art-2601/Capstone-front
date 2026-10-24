@@ -1,15 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-
-const API = 'http://localhost/beaconmart-project/backend';
-
-function post(path, body) {
-  return fetch(API + path, {
-    credentials: 'include',
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  }).then(res => res.json());
-}
+import { API, postJSON } from './api';
 
 function localNow(offsetHours = 0) {
   const d = new Date(Date.now() + offsetHours * 3600 * 1000);
@@ -57,7 +47,7 @@ function Warehouse({ branches, onChange }) {
   const run = async (path, body, reset) => {
     setBusy(true);
     try {
-      const result = await post(path, body);
+      const result = await postJSON(path, body);
       setMessage(result.success ? result.message : 'Error: ' + result.message);
       if (result.success) {
         if (reset) reset();

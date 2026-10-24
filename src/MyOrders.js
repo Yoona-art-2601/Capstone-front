@@ -4,12 +4,11 @@ import { productIcon } from './store';
 import { PageShell } from './Layout';
 import { Stars, StarInput } from './Stars';
 import { clearSavedCart } from './cartStorage';
-
-const API = 'http://localhost/beaconmart-project/backend';
+import { API } from './api';
 
 const PAYMENT_LABELS = { Stripe: 'Online payment', COD: 'Cash on delivery', PayAtStore: 'Pay at store' };
 
-export function stepLabel(status, deliveryType) {
+function stepLabel(status, deliveryType) {
   if (status === 'Completed') return deliveryType === 'Pickup' ? 'Picked up' : 'Delivered';
   if (status === 'Pending') return 'Order placed';
   return status;

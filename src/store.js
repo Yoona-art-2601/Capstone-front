@@ -5,9 +5,8 @@ import { Stars } from './Stars';
 import NotificationBell from './NotificationBell';
 import { SiteFooter, WhatsAppButton } from './Layout';
 import ProductModal, { productImageUrl } from './ProductModal';
-import { loadSavedBranch, saveBranch, loadSavedCart, saveCart, rebuildCart } from './cartStorage';
-
-const API = 'http://localhost/beaconmart-project/backend';
+import { loadSavedBranch, saveBranch, loadSavedCart, saveCart, rebuildCart, savedCartCount } from './cartStorage';
+import { API, rm } from './api';
 
 const CATEGORY_ICONS = [
   ['chicken', '🍗'], ['meat', '🥩'], ['seafood', '🐟'], ['fish', '🐟'],
@@ -23,7 +22,7 @@ const NAME_ICONS = [
   ['salmon', '🐟'], ['mackerel', '🐟'], ['fish', '🐟'],
 ];
 
-export function categoryIcon(category) {
+function categoryIcon(category) {
   const c = (category || '').toLowerCase();
   const match = CATEGORY_ICONS.find(([key]) => c.includes(key));
   return match ? match[1] : '🛒';
@@ -34,8 +33,6 @@ export function productIcon(product) {
   const match = NAME_ICONS.find(([key]) => n.includes(key));
   return match ? match[1] : categoryIcon(product.category);
 }
-
-const rm = (value) => 'RM ' + Number(value).toFixed(2);
 
 const PROMOTIONS = 'Promotions';
 
@@ -221,6 +218,18 @@ function Store() {
 
   const branchName = (branches.find(b => b.branch_id === branchId) || {}).branch_name || '';
 
+  const changeBranch = (newId) => {
+    const newName = (branches.find(b => b.branch_id === newId) || {}).branch_name || 'this branch';
+    const waiting = savedCartCount(newId);
+    if (cart.length || waiting) {
+      showNotice(
+        (cart.length ? 'Your cart at ' + branchName + ' is saved for when you switch back. ' : '') +
+        'Now showing ' + newName + (waiting ? ', where you have ' + waiting + ' item(s) in your cart.' : '.')
+      );
+    }
+    setBranchId(newId);
+  };
+
   const addToCart = (product, qty = 1) => {
     const existing = cart.find(item => item.product_id === product.product_id);
     const currentQty = existing ? existing.quantity : 0;
@@ -381,7 +390,7 @@ function Store() {
 
         <label className="branch-picker">
           <span>📍</span>
-          <select value={branchId} onChange={(e) => setBranchId(Number(e.target.value))}>
+          <select value={branchId} onChange={(e) => changeBranch(Number(e.target.value))}>
             {branches.map(b => (
               <option key={b.branch_id} value={b.branch_id}>{b.branch_name}</option>
             ))}

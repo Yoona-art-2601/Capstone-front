@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react';
 import './Admin.css';
 import Orders from './Orders';
 import Inventory from './Inventory';
-import Transfers from './Transfers'
+import Transfers from './Transfers';
 import Warehouse from './Warehouse';
 import Dashboard from './Dashboard';
 import Login from './Login';
 import NotificationBell from './NotificationBell';
 import AuditTrail from './AuditTrail';
-
-const API = 'http://localhost/beaconmart-project/backend';
+import { API } from './api';
 
 const TABS = [
   { key: 'orders', label: 'Orders' },
@@ -19,6 +18,8 @@ const TABS = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'audit', label: 'Audit Trail' },
 ];
+
+const BRANCH_TABS = ['orders', 'inventory', 'transfers', 'dashboard'];
 
 function Admin() {
   const [user, setUser] = useState(null);
@@ -60,7 +61,6 @@ function AdminPanel({ user, onLogout }) {
       .catch(err => console.error('Error fetching branches:', err));
   }, []);
 
-  // low-stock count shown on the Inventory tab
   useEffect(() => {
     const query = branchId === 'all' ? '' : '?branch_id=' + branchId;
     fetch(API + '/stock/get_low_stock.php' + query, { credentials: 'include' })
@@ -71,25 +71,39 @@ function AdminPanel({ user, onLogout }) {
       .catch(err => console.error('Error fetching low stock:', err));
   }, [branchId, refreshKey]);
 
+  const openLink = (link) => {
+    const [key, query] = link.split('?');
+    if (!TABS.some(t => t.key === key)) return;
+    const branch = Number(new URLSearchParams(query || '').get('branch'));
+    if (branch) setBranchId(branch);
+    setTab(key);
+  };
+
+  const usesBranch = BRANCH_TABS.includes(tab);
+
   return (
     <div className="admin">
       <header className="admin-header">
         <h1>Beacon Mart Admin</h1>
         <div className="admin-header-right">
-          <label>
-            Branch:{' '}
-            <select
-              value={branchId}
-              onChange={(e) => setBranchId(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-            >
-              <option value="all">All branches</option>
-              {branches.map(b => (
-                <option key={b.branch_id} value={b.branch_id}>{b.branch_name}</option>
-              ))}
-            </select>
-          </label>
+          {usesBranch ? (
+            <label>
+              Branch:{' '}
+              <select
+                value={branchId}
+                onChange={(e) => setBranchId(e.target.value === 'all' ? 'all' : Number(e.target.value))}
+              >
+                <option value="all">All branches</option>
+                {branches.map(b => (
+                  <option key={b.branch_id} value={b.branch_id}>{b.branch_name}</option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <span className="admin-scope">All branches</span>
+          )}
           <a href="/" className="admin-link">&larr; Back to store</a>
-          <NotificationBell variant="admin" onOpenLink={(link) => { if (TABS.some(t => t.key === link)) setTab(link); }} />
+          <NotificationBell variant="admin" onOpenLink={openLink} />
           <span className="admin-user">{user.name}</span>
           <button className="logout-btn" onClick={onLogout}>Logout</button>
         </div>

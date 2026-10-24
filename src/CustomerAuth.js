@@ -1,15 +1,5 @@
 import { useState } from 'react';
-
-const API = 'http://localhost/beaconmart-project/backend';
-
-function postJSON(path, body) {
-  return fetch(API + path, {
-    credentials: 'include',
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  }).then(res => res.json());
-}
+import { postJSON } from './api';
 
 function CustomerAuth({ onLogin, onClose }) {
   const [mode, setMode] = useState('login');

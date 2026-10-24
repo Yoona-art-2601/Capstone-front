@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PageShell } from './Layout';
-
-const API = 'http://localhost/beaconmart-project/backend';
+import { API } from './api';
 
 function Stores() {
   const [branches, setBranches] = useState([]);

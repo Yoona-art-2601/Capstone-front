@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-
-const API = 'http://localhost/beaconmart-project/backend';
+import { API } from './api';
 
 function timeAgo(value) {
   const then = new Date(value.replace(' ', 'T')).getTime();

@@ -1,8 +1,5 @@
 import { PageShell, useShopSettings } from './Layout';
-
-function rm(value) {
-  return 'RM ' + Number(value).toFixed(2);
-}
+import { rm } from './api';
 
 function AboutUs() {
   return (
@@ -119,8 +116,10 @@ function RefundPolicy({ settings }) {
       <div className="info-card">
         <h2>Cancelling an order</h2>
         <p>
-          Orders can be cancelled by contacting us before they are delivered. When a paid order is cancelled, the
-          items are returned to the branch's stock and the payment will be refunded to the original payment method.
+          Orders that are not paid yet (awaiting online payment, cash on delivery or pay at store) can be cancelled
+          yourself in My Orders until the branch starts preparing them. For paid orders, or orders already being
+          prepared, please contact us before they are delivered or collected. When a paid order is cancelled, the
+          card payment is refunded to the original card through Stripe.
         </p>
         <h2>Damaged or incorrect items</h2>
         <p>
@@ -172,7 +171,10 @@ function Terms() {
         <ul>
           <li>Prices are shown in Malaysian Ringgit (RM) and may change without notice.</li>
           <li>Product availability depends on the stock of the branch you select.</li>
-          <li>An order is confirmed only after payment is successfully completed.</li>
+          <li>
+            Card orders are confirmed once the online payment is completed. Cash on delivery and pay at store orders
+            are confirmed when placed and paid when you receive or collect them.
+          </li>
           <li>Product images and icons are for illustration only.</li>
           <li>We may cancel an order if an item becomes unavailable, in which case a full refund will be given.</li>
         </ul>

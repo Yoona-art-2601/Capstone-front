@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
+import { API } from './api';
 import './App.css';
-
-const API = 'http://localhost/beaconmart-project/backend';
 
 let settingsPromise = null;
 
@@ -19,7 +18,7 @@ export function useShopSettings() {
   return settings;
 }
 
-export function Brand() {
+function Brand() {
   return (
     <a href="/" className="brand">
       <span className="brand-mark">🌿</span>
@@ -31,7 +30,7 @@ export function Brand() {
   );
 }
 
-export function SimpleHeader() {
+function SimpleHeader() {
   return (
     <header className="topbar">
       <Brand />

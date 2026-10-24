@@ -1,20 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-
-const API = 'http://localhost/beaconmart-project/backend';
+import { API, postJSON } from './api';
 
 function nowStamp() {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, '0');
   return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
-}
-
-function post(path, body) {
-  return fetch(API + path, {
-    credentials: 'include',
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  }).then(res => res.json());
 }
 
 function ProductDetails({ product, onDone }) {
@@ -63,7 +53,7 @@ function ProductDetails({ product, onDone }) {
   const saveDescription = async () => {
     setBusy(true);
     try {
-      const result = await post('/products/update_product.php', {
+      const result = await postJSON('/products/update_product.php', {
         product_id: product.product_id,
         name: product.name,
         category: product.category,
@@ -134,7 +124,7 @@ function ProductRow({ product, branchId, onDone }) {
       return;
     }
     try {
-      const r1 = await post('/products/update_product.php', {
+      const r1 = await postJSON('/products/update_product.php', {
         product_id: product.product_id,
         name: form.name,
         category: form.category,
@@ -147,7 +137,7 @@ function ProductRow({ product, branchId, onDone }) {
         onDone('Error: ' + r1.message);
         return;
       }
-      const r2 = await post('/stock/update_threshold.php', {
+      const r2 = await postJSON('/stock/update_threshold.php', {
         branch_id: branchId,
         product_id: product.product_id,
         low_stock_threshold: form.low_stock_threshold
@@ -177,7 +167,7 @@ function ProductRow({ product, branchId, onDone }) {
     const change = adjType === 'Stock Out' ? -qty : qty;
 
     try {
-      const result = await post('/stock/update_stock.php', {
+      const result = await postJSON('/stock/update_stock.php', {
         branch_id: branchId,
         product_id: product.product_id,
         quantity_change: change,
@@ -199,7 +189,7 @@ function ProductRow({ product, branchId, onDone }) {
     );
     if (!ok) return;
     try {
-      const result = await post('/products/delete_product.php', { product_id: product.product_id });
+      const result = await postJSON('/products/delete_product.php', { product_id: product.product_id });
       onDone(result.success ? '"' + product.name + '" removed from the store.' : 'Error: ' + result.message);
     } catch (err) {
       console.error(err);
@@ -224,7 +214,7 @@ function ProductRow({ product, branchId, onDone }) {
       </td>
       <td>
         {editing ? (
-          <input value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
+          <input list="category-options" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} />
         ) : product.category}
       </td>
       <td>
@@ -271,8 +261,8 @@ function ProductRow({ product, branchId, onDone }) {
       </td>
       <td>
         <select value={adjType} onChange={(e) => setAdjType(e.target.value)}>
-          <option value="Restock">Stock In</option>
-          <option value="Stock Out">Stock Out</option>
+          <option value="Restock">Stock In (local supplier)</option>
+          <option value="Stock Out">Stock Out (damaged / expired)</option>
           <option value="Adjustment">Adjustment (+/-)</option>
         </select>{' '}
         <input type="number" className="narrow" placeholder="Qty" value={adjQty}
@@ -340,7 +330,7 @@ function Inventory({ branchId, onChange }) {
       return;
     }
     try {
-      const result = await post('/products/add_product.php', {
+      const result = await postJSON('/products/add_product.php', {
         name: newProduct.name,
         category: newProduct.category,
         price: newProduct.price,
@@ -365,14 +355,23 @@ function Inventory({ branchId, onChange }) {
   }
 
   const lowCount = products.filter(p => Number(p.stock) <= Number(p.low_stock_threshold)).length;
+  const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean))).sort();
 
   return (
     <div>
+      <datalist id="category-options">
+        {categories.map(c => <option key={c} value={c} />)}
+      </datalist>
       <div className="toolbar">
         <button onClick={() => setShowAdd(!showAdd)}>{showAdd ? 'Close' : '+ Add product'}</button>
         <button onClick={loadProducts}>Refresh</button>
         <span>{products.length} product(s)</span>
       </div>
+
+      <p className="hint-line">
+        Regular restocking comes from the central warehouse: use the Warehouse tab to ship stock to this branch.
+        Stock In here is only for deliveries that arrive at the branch directly.
+      </p>
 
       {lowCount > 0 && (
         <div className="notice alert">
@@ -388,7 +387,7 @@ function Inventory({ branchId, onChange }) {
           <div className="form-grid">
             <input placeholder="Name" value={newProduct.name}
               onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} />
-            <input placeholder="Category" value={newProduct.category}
+            <input list="category-options" placeholder="Category" value={newProduct.category}
               onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })} />
             <input type="number" step="0.01" min="0" placeholder="Price (RM)" value={newProduct.price}
               onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} />

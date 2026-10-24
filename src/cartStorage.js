@@ -26,25 +26,40 @@ export function saveBranch(branchId) {
   write(BRANCH_KEY, branchId);
 }
 
-export function loadSavedCart(branchId) {
+function readCarts() {
   const saved = read(CART_KEY);
-  if (!saved || saved.branch_id !== branchId || !Array.isArray(saved.items)) return [];
-  return saved.items;
+  if (!saved || typeof saved !== 'object') return {};
+  if (Array.isArray(saved.items)) return { [saved.branch_id]: saved.items };
+  return saved.carts && typeof saved.carts === 'object' ? saved.carts : {};
+}
+
+function writeCarts(carts) {
+  write(CART_KEY, { carts });
+}
+
+export function loadSavedCart(branchId) {
+  const items = readCarts()[branchId];
+  return Array.isArray(items) ? items : [];
 }
 
 export function saveCart(branchId, cart) {
-  write(CART_KEY, {
-    branch_id: branchId,
-    items: cart.map(item => ({ product_id: item.product_id, quantity: item.quantity }))
-  });
+  const carts = readCarts();
+  if (cart.length) {
+    carts[branchId] = cart.map(item => ({ product_id: item.product_id, quantity: item.quantity }));
+  } else {
+    delete carts[branchId];
+  }
+  writeCarts(carts);
 }
 
-export function clearSavedCart() {
-  try {
-    window.localStorage.removeItem(CART_KEY);
-  } catch (e) {
-    return;
-  }
+export function clearSavedCart(branchId = loadSavedBranch()) {
+  const carts = readCarts();
+  delete carts[branchId];
+  writeCarts(carts);
+}
+
+export function savedCartCount(branchId) {
+  return loadSavedCart(branchId).reduce((sum, item) => sum + item.quantity, 0);
 }
 
 export function rebuildCart(savedItems, products) {

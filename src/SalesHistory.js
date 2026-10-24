@@ -1,10 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-
-const API = 'http://localhost/beaconmart-project/backend';
-
-const rm = (value) => 'RM ' + Number(value).toFixed(2);
+import { API, rm } from './api';
 
 function isoDate(d) {
   const pad = (n) => String(n).padStart(2, '0');

@@ -1,16 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { Chart, BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 import SalesHistory from './SalesHistory';
+import { rm, getJSON } from './api';
 
 Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
-
-const API = 'http://localhost/beaconmart-project/backend';
-
-const rm = (value) => 'RM ' + Number(value).toFixed(2);
-
-function getJSON(path) {
-  return fetch(API + path, { credentials: 'include' }).then(res => res.json());
-}
 
 function BarChart({ labels, values, label, color }) {
   const canvasRef = useRef(null);
@@ -77,22 +70,27 @@ function Dashboard({ branchId }) {
     <div>
       {error && <div className="notice alert">{error}</div>}
 
+      <p className="hint-line">
+        Sales cards and charts show what customers paid, including SST and delivery. The sales history at the bottom
+        shows product revenue only, before SST and delivery.
+      </p>
+
       {summary && (
         <div className="cards">
           <div className="card">
             <div className="label">Today</div>
             <div className="value">{rm(summary.today.total_sales)}</div>
-            <div className="sub">{summary.today.order_count} order(s)</div>
+            <div className="sub">{summary.today.order_count} paid order(s)</div>
           </div>
           <div className="card">
             <div className="label">This week</div>
             <div className="value">{rm(summary.this_week.total_sales)}</div>
-            <div className="sub">{summary.this_week.order_count} order(s)</div>
+            <div className="sub">{summary.this_week.order_count} paid order(s)</div>
           </div>
           <div className="card">
             <div className="label">This month</div>
             <div className="value">{rm(summary.this_month.total_sales)}</div>
-            <div className="sub">{summary.this_month.order_count} order(s)</div>
+            <div className="sub">{summary.this_month.order_count} paid order(s)</div>
           </div>
         </div>
       )}
@@ -102,7 +100,7 @@ function Dashboard({ branchId }) {
           <div className="chart-grid">
             <div className="panel">
               <div className="toolbar">
-                <h3 style={{ margin: 0 }}>Daily sales</h3>
+                <h3 style={{ margin: 0 }}>Daily sales (incl. SST and delivery)</h3>
                 <select value={days} onChange={(e) => setDays(Number(e.target.value))}>
                   <option value={7}>Last 7 days</option>
                   <option value={30}>Last 30 days</option>
@@ -112,7 +110,7 @@ function Dashboard({ branchId }) {
             </div>
 
             <div className="panel">
-              <h3>Sales by branch (all time)</h3>
+              <h3>Sales by branch (all time, incl. SST and delivery)</h3>
               <BarChart labels={branchLabels} values={branchValues} label="Revenue (RM)" color="rgba(40, 167, 69, 0.75)" />
             </div>
           </div>

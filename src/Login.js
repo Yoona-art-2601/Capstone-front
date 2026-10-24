@@ -1,6 +1,5 @@
 import { useState } from 'react';
-
-const API = 'http://localhost/beaconmart-project/backend';
+import { API } from './api';
 
 function Login({ onLogin }) {
   const [email, setEmail] = useState('');

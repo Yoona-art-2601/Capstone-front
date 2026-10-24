@@ -8,6 +8,8 @@
 .admin-header-right { display: flex; align-items: center; gap: 20px; }
 .admin-header select { padding: 4px 8px; }
 .admin-link { color: #9ec5fe; text-decoration: none; }
+.admin-scope { color: #ddd; font-size: 14px; }
+.hint-line { margin: 0 0 14px; color: #666; font-size: 13px; }
 
 .admin-tabs { display: flex; gap: 4px; background: white; padding: 0 24px; border-bottom: 1px solid #ddd; }
 .admin-tabs button {

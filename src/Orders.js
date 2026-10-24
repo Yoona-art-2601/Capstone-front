@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { API } from './api';
 
-const API = 'http://localhost/beaconmart-project/backend';
 const STATUS_OPTIONS = ['Pending', 'Processing', 'Out for Delivery', 'Ready for Pickup', 'Completed', 'Cancelled'];
 const PAYMENT_LABELS = { Stripe: 'Online (Stripe)', COD: 'Cash on delivery', PayAtStore: 'Pay at store' };
 
@@ -40,8 +40,11 @@ function Orders({ branchId }) {
     if (newStatus === order.status) return;
 
     if (newStatus === 'Cancelled') {
+      const refund = order.payment_method === 'Stripe' && order.payment_status === 'Paid'
+        ? ' The online payment of RM ' + Number(order.total_amount).toFixed(2) + ' will be refunded through Stripe.'
+        : '';
       const ok = window.confirm(
-        'Cancel order #' + order.order_id + '? Stock will be returned to the branch. This cannot be undone.'
+        'Cancel order #' + order.order_id + '? Stock will be returned to the branch.' + refund + ' This cannot be undone.'
       );
       if (!ok) return;
     }
@@ -56,7 +59,7 @@ function Orders({ branchId }) {
       .then(result => {
         setMessage(
           result.success
-            ? 'Order #' + order.order_id + ' updated to ' + newStatus + '.'
+            ? 'Order #' + order.order_id + ': ' + (newStatus === 'Cancelled' ? result.message : 'updated to ' + newStatus) + '.'
             : 'Error: ' + result.message
         );
         loadOrders();
