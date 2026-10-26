@@ -1,70 +1,51 @@
-# Getting Started with Create React App
+# Beacon Mart – Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+React 19 (Create React App) storefront and admin panel for the Beacon Mart order and inventory management system.
 
-## Available Scripts
+Full setup instructions (XAMPP, database, Stripe test keys, first admin) are in the backend README:
+**[Capstone-project-backend](https://github.com/Yoona-art-2601/Capstone-project-backend#readme)**
 
-In the project directory, you can run:
+## Quick start
 
-### `npm start`
+The backend must run on XAMPP at `http://localhost/beaconmart-project/backend`, and this repo must be cloned next to it as `beaconmart-project/frontend`.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+```bash
+npm install
+npm start
+```
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+| Page | URL |
+|---|---|
+| Store | http://localhost:3000 |
+| Cart and checkout | http://localhost:3000/cart |
+| My Orders | http://localhost:3000/my-orders |
+| My Account | http://localhost:3000/account |
+| Store locations | http://localhost:3000/stores |
+| Admin panel | http://localhost:3000/admin |
 
-### `npm test`
+To use a different backend address, set `REACT_APP_API_URL` before starting, for example in a `.env.local` file:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+REACT_APP_API_URL=http://localhost/beaconmart-project/backend
+```
 
-### `npm run build`
+## Scripts
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+| Command | What it does |
+|---|---|
+| `npm start` | Development server on port 3000 |
+| `npm test` | Unit tests (cart storage and phone validation) |
+| `npm run build` | Production build in `build/` |
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Main files
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+| File | Purpose |
+|---|---|
+| `src/App.js` | Picks the page from the URL |
+| `src/api.js` | API address and shared request helpers |
+| `src/store.js` | Product grid, filters, branch picker, cart sidebar |
+| `src/CartPage.js` | Delivery or pickup, address, time slot, payment |
+| `src/MyOrders.js`, `src/AccountPage.js` | Customer orders, reviews, account and password |
+| `src/Admin.js` | Admin shell: Orders, Inventory, Stock Transfers, Warehouse, Dashboard, Audit Trail |
+| `src/cartStorage.js` | Cart saved per branch in localStorage |
+| `DESIGN.md` | Design rules (colours, type, components) for new pages |
