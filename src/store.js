@@ -2,8 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import './App.css';
 import CustomerAuth from './CustomerAuth';
 import { Stars } from './Stars';
-import NotificationBell from './NotificationBell';
-import { SiteFooter, WhatsAppButton } from './Layout';
+import { SiteHeader, SiteFooter, WhatsAppButton } from './Layout';
 import ProductModal, { productImageUrl } from './ProductModal';
 import { loadSavedBranch, saveBranch, loadSavedCart, saveCart, rebuildCart, savedCartCount } from './cartStorage';
 import { API, rm } from './api';
@@ -379,41 +378,22 @@ function Store() {
           🚚 FREE delivery for orders {rm(settings.free_delivery_threshold)} and above
         </div>
       )}
-      <header className="topbar">
-        <a href="/" className="brand">
-          <span className="brand-mark">🌿</span>
-          <span>
-            <span className="brand-name">Beacon Mart</span>
-            <span className="brand-tag">Natural &amp; Healthy Food</span>
-          </span>
-        </a>
-
-        <label className="branch-picker">
-          <span>📍</span>
-          <select value={branchId} onChange={(e) => changeBranch(Number(e.target.value))}>
-            {branches.map(b => (
-              <option key={b.branch_id} value={b.branch_id}>{b.branch_name}</option>
-            ))}
-          </select>
-        </label>
-
-        <div className="topbar-actions">
-          <a href="/stores" className="btn btn-ghost hide-mobile">Our Stores</a>
-          {user ? (
-            <>
-              <NotificationBell />
-              <a href="/account" className="greeting" title="My account">Hi, {user.name}</a>
-              <a href="/my-orders" className="btn btn-ghost">My Orders</a>
-              <button className="btn btn-ghost" onClick={handleLogout}>Logout</button>
-            </>
-          ) : (
-            <button className="btn btn-ghost" onClick={() => setShowAuth(true)}>Login / Register</button>
-          )}
-          <a href="/cart" className="cart-button" aria-label="View cart">
-            🛒 <span className="cart-count">{cartCount}</span>
-          </a>
-        </div>
-      </header>
+      <SiteHeader
+        user={user}
+        cartCount={cartCount}
+        onLogin={() => setShowAuth(true)}
+        onLogout={handleLogout}
+        middle={
+          <label className="branch-picker">
+            <span>📍</span>
+            <select value={branchId} onChange={(e) => changeBranch(Number(e.target.value))}>
+              {branches.map(b => (
+                <option key={b.branch_id} value={b.branch_id}>{b.branch_name}</option>
+              ))}
+            </select>
+          </label>
+        }
+      />
 
       {showAuth && <CustomerAuth onLogin={handleLogin} onClose={() => setShowAuth(false)} />}
       {detailProduct && (

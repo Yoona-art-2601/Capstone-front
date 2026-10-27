@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { API } from './api';
+import { formatDateTime } from './format';
 
 const ACTION_CLASS = {
   LOGIN: 'login',
@@ -124,7 +125,7 @@ function AuditTrail() {
           )}
           {logs.map(log => (
             <tr key={log.log_id}>
-              <td className="nowrap">{log.created_at}</td>
+              <td className="nowrap">{formatDateTime(log.created_at)}</td>
               <td>
                 {log.user_name || '-'}
                 {log.user_role && <><br /><small>{log.user_role}</small></>}

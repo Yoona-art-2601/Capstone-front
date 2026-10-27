@@ -116,7 +116,7 @@ button.danger { color: #dc3545; }
 .wh-title { margin: 28px 0 10px; }
 @media (max-width: 1000px) { .wh-forms { grid-template-columns: 1fr; } }
 
-.sales-history { margin-top: 20px; }
+.sales-history { margin-top: 0; }
 .sales-history-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .sales-history-head h3 { margin: 0; }
 .sales-history-actions { display: flex; gap: 8px; }
@@ -126,3 +126,25 @@ button.danger { color: #dc3545; }
 .sales-history-filters input[type="date"] { padding: 4px 6px; }
 .share-bar { width: 80px; height: 6px; background: #e5e5e5; border-radius: 3px; overflow: hidden; display: inline-block; margin-right: 6px; vertical-align: middle; }
 .share-bar span { display: block; height: 100%; background: #2d6a45; }
+
+@media (max-width: 800px) {
+  .admin-header { flex-wrap: wrap; gap: 10px; padding: 12px 14px; }
+  .admin-header h1 { font-size: 18px; }
+  .admin-header-right { flex-wrap: wrap; gap: 10px 14px; width: 100%; }
+  .admin-tabs { overflow-x: auto; padding: 0 8px; -webkit-overflow-scrolling: touch; }
+  .admin-tabs button { white-space: nowrap; padding: 12px 12px; font-size: 14px; flex-shrink: 0; }
+  .admin-content { padding: 14px 12px; }
+  .toolbar { flex-wrap: wrap; gap: 10px; }
+  .admin-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-table th, .admin-table td { min-width: 96px; }
+  .admin-table th:first-child, .admin-table td:first-child { min-width: 0; }
+  .chart-grid { grid-template-columns: 1fr; }
+  .cards .card { min-width: 140px; }
+  .panel, .form-box { padding: 12px 14px; }
+  .wh-forms .form-grid { grid-template-columns: 1fr; }
+  .form-grid input, .form-grid select { max-width: 100%; box-sizing: border-box; }
+  .details-image { width: 100%; }
+  .details-description { min-width: 0; }
+  .login-box { width: 100%; max-width: 320px; box-sizing: border-box; }
+  .login-page { padding: 16px; box-sizing: border-box; }
+}

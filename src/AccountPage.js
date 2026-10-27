@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { PageShell } from './Layout';
-import { getJSON, postJSON } from './api';
+import { API, getJSON, postJSON } from './api';
 
 const EMPTY_FORM = { current: '', next: '', confirm: '' };
 
@@ -19,6 +19,11 @@ function AccountPage() {
       .catch(() => setError('Cannot connect to server.'))
       .finally(() => setLoading(false));
   }, []);
+
+  const logout = () => {
+    fetch(API + '/auth/logout.php', { credentials: 'include' })
+      .finally(() => { window.location.href = '/'; });
+  };
 
   const setField = (field) => (e) => {
     setForm({ ...form, [field]: e.target.value });
@@ -66,6 +71,7 @@ function AccountPage() {
               <div className="account-links">
                 <a href="/my-orders" className="btn btn-ghost btn-sm">My Orders</a>
                 {user.role === 'Admin' && <a href="/admin" className="btn btn-ghost btn-sm">Admin panel</a>}
+                <button className="btn btn-ghost btn-sm" onClick={logout}>Logout</button>
               </div>
             </section>
 

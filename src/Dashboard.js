@@ -31,7 +31,6 @@ function Dashboard({ branchId }) {
   const [days, setDays] = useState(7);
   const [summary, setSummary] = useState(null);
   const [dash, setDash] = useState(null);
-  const [topProducts, setTopProducts] = useState([]);
   const [lowStock, setLowStock] = useState([]);
   const [error, setError] = useState('');
 
@@ -46,13 +45,11 @@ function Dashboard({ branchId }) {
     Promise.all([
       getJSON(url('/stats/sales_summary.php')),
       getJSON(url('/stats/dashboard.php', 'days=' + days)),
-      getJSON(url('/stats/top_products.php')),
       getJSON(url('/stock/get_low_stock.php'))
     ])
-      .then(([s, d, t, l]) => {
+      .then(([s, d, l]) => {
         if (s.success) setSummary(s.data);
         if (d.success) setDash(d.data);
-        if (t.success) setTopProducts(t.data);
         if (l.success) setLowStock(l.data);
       })
       .catch(err => {
@@ -71,8 +68,8 @@ function Dashboard({ branchId }) {
       {error && <div className="notice alert">{error}</div>}
 
       <p className="hint-line">
-        Sales cards and charts show what customers paid, including SST and delivery. The sales history at the bottom
-        shows product revenue only, before SST and delivery.
+        Sales cards and charts show what customers paid, including SST and delivery. The sales history below the
+        charts ranks products by revenue before SST and delivery, for any period you choose.
       </p>
 
       {summary && (
@@ -114,7 +111,13 @@ function Dashboard({ branchId }) {
               <BarChart labels={branchLabels} values={branchValues} label="Revenue (RM)" color="rgba(40, 167, 69, 0.75)" />
             </div>
           </div>
+        </>
+      )}
 
+      <SalesHistory branchId={branchId} />
+
+      {dash && (
+        <>
           <div className="panel">
             <h3>Stock summary</h3>
             <table className="admin-table">
@@ -146,33 +149,6 @@ function Dashboard({ branchId }) {
       )}
 
       <div className="panel">
-        <h3>Best sellers</h3>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Category</th>
-              <th>Units sold</th>
-              <th>Revenue</th>
-            </tr>
-          </thead>
-          <tbody>
-            {topProducts.length === 0 && (
-              <tr><td colSpan="4">No sales yet.</td></tr>
-            )}
-            {topProducts.map(p => (
-              <tr key={p.product_id}>
-                <td>{p.name}</td>
-                <td>{p.category}</td>
-                <td>{p.total_sold}</td>
-                <td>{rm(p.total_revenue)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="panel">
         <h3>Low-stock items</h3>
         <table className="admin-table">
           <thead>
@@ -198,8 +174,6 @@ function Dashboard({ branchId }) {
           </tbody>
         </table>
       </div>
-
-      <SalesHistory branchId={branchId} />
     </div>
   );
 }

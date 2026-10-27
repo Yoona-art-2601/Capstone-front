@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { postJSON } from './api';
 
+export const AUTH_EVENT = 'beaconmart-auth-change';
+
 function CustomerAuth({ onLogin, onClose }) {
   const [mode, setMode] = useState('login');
   const [name, setName] = useState('');
@@ -29,7 +31,9 @@ function CustomerAuth({ onLogin, onClose }) {
       }
       const result = await postJSON('/auth/login.php', { email, password });
       if (result.success) {
+        window.dispatchEvent(new Event(AUTH_EVENT));
         onLogin(result.user);
+        return;
       } else {
         setError(result.message);
       }

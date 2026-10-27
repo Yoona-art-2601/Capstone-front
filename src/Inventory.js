@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { API, postJSON } from './api';
+import { formatDate } from './format';
 
 function nowStamp() {
   const d = new Date();
@@ -237,7 +238,7 @@ function ProductRow({ product, branchId, onDone }) {
           <>
             {Number(product.sale_price).toFixed(2)}{' '}
             <span className="pill sale">-{Math.round((1 - product.sale_price / product.price) * 100)}%</span>
-            {product.sale_end && <><br /><small>until {product.sale_end.slice(0, 10)}</small></>}
+            {product.sale_end && <><br /><small>until {formatDate(product.sale_end)}</small></>}
           </>
         ) : product.sale_price_set !== null && product.sale_price_set !== undefined ? (
           <>
@@ -245,7 +246,7 @@ function ProductRow({ product, branchId, onDone }) {
             <span className="pill unpaid">{product.sale_start && product.sale_start > nowStamp() ? 'Scheduled' : 'Ended'}</span>
             <br />
             <small>
-              {product.sale_start ? product.sale_start.slice(0, 10) : 'now'} to {product.sale_end ? product.sale_end.slice(0, 10) : 'no end'}
+              {product.sale_start ? formatDate(product.sale_start) : 'now'} to {product.sale_end ? formatDate(product.sale_end) : 'no end'}
             </small>
           </>
         ) : '-'}

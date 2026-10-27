@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
-import { API } from './api';
+import { API, getJSON } from './api';
+import NotificationBell from './NotificationBell';
+import CustomerAuth, { AUTH_EVENT } from './CustomerAuth';
+import { loadSavedBranch, savedCartCount, CART_EVENT } from './cartStorage';
 import './App.css';
 
 let settingsPromise = null;
@@ -30,15 +33,73 @@ function Brand() {
   );
 }
 
-function SimpleHeader() {
+export function SiteHeader({ user, cartCount, onLogin, onLogout, middle }) {
   return (
     <header className="topbar">
       <Brand />
+      {middle}
       <nav className="topbar-actions">
-        <a href="/" className="btn btn-ghost">Shop</a>
-        <a href="/stores" className="btn btn-ghost">Our Stores</a>
+        <a href="/stores" className="btn btn-ghost hide-mobile">Our Stores</a>
+        {user ? (
+          <>
+            <NotificationBell />
+            <a href="/account" className="account-link" aria-label="My account">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21c0-4 4-6 8-6s8 2 8 6" />
+              </svg>
+              <span className="greeting">Hi, {user.name}</span>
+            </a>
+            <a href="/my-orders" className="btn btn-ghost hide-mobile">My Orders</a>
+            <button className="btn btn-ghost hide-mobile" onClick={onLogout}>Logout</button>
+          </>
+        ) : (
+          <button className="btn btn-ghost" onClick={onLogin}>Login / Register</button>
+        )}
+        <a href="/cart" className="cart-button" aria-label={'View cart, ' + cartCount + ' item(s)'}>
+          🛒 <span className="cart-count">{cartCount}</span>
+        </a>
       </nav>
     </header>
+  );
+}
+
+function ShellHeader() {
+  const [user, setUser] = useState(null);
+  const [showAuth, setShowAuth] = useState(false);
+  const [cartCount, setCartCount] = useState(() => savedCartCount(loadSavedBranch() || 1));
+
+  useEffect(() => {
+    const loadUser = () => getJSON('/auth/me.php')
+      .then(result => setUser(result.success ? result.user : null))
+      .catch(() => {});
+    const updateCart = () => setCartCount(savedCartCount(loadSavedBranch() || 1));
+    loadUser();
+    window.addEventListener(AUTH_EVENT, loadUser);
+    window.addEventListener(CART_EVENT, updateCart);
+    window.addEventListener('storage', updateCart);
+    return () => {
+      window.removeEventListener(AUTH_EVENT, loadUser);
+      window.removeEventListener(CART_EVENT, updateCart);
+      window.removeEventListener('storage', updateCart);
+    };
+  }, []);
+
+  const logout = () => {
+    fetch(API + '/auth/logout.php', { credentials: 'include' })
+      .finally(() => window.location.reload());
+  };
+
+  return (
+    <>
+      <SiteHeader user={user} cartCount={cartCount} onLogin={() => setShowAuth(true)} onLogout={logout} />
+      {showAuth && (
+        <CustomerAuth
+          onLogin={() => { setShowAuth(false); window.location.reload(); }}
+          onClose={() => setShowAuth(false)}
+        />
+      )}
+    </>
   );
 }
 
@@ -103,7 +164,7 @@ export function SiteFooter() {
 export function PageShell({ children }) {
   return (
     <div className="my-orders-page">
-      <SimpleHeader />
+      <ShellHeader />
       <div className="page-content">{children}</div>
       <SiteFooter />
       <WhatsAppButton />

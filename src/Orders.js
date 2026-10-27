@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { API } from './api';
+import { formatDateTime, formatSlot } from './format';
 
 const STATUS_OPTIONS = ['Pending', 'Processing', 'Out for Delivery', 'Ready for Pickup', 'Completed', 'Cancelled'];
 const PAYMENT_LABELS = { Stripe: 'Online (Stripe)', COD: 'Cash on delivery', PayAtStore: 'Pay at store' };
@@ -141,7 +142,7 @@ function Orders({ branchId }) {
                 <td>
                   {order.delivery_type === 'Pickup' ? 'Self pickup' : 'Delivery'}
                   {order.distance_km && <small> ({Number(order.distance_km).toFixed(1)} km)</small>}
-                  {order.slot_date && <><br /><small>{order.slot_date} {order.slot_time}</small></>}
+                  {order.slot_date && <><br /><small>{formatSlot(order.slot_date, order.slot_time)}</small></>}
                 </td>
                 <td>
                   <span className={'pill ' + (order.payment_status === 'Paid' ? 'paid' : order.payment_status === 'Refunded' ? 'cancelled' : 'unpaid')}>
@@ -166,7 +167,7 @@ function Orders({ branchId }) {
                     </span>
                   )}
                 </td>
-                <td>{order.order_date}</td>
+                <td className="nowrap">{formatDateTime(order.order_date)}</td>
               </tr>
             ))}
           </tbody>

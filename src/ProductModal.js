@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Stars } from './Stars';
 import { API, rm } from './api';
+import { formatDate } from './format';
 
 export function productImageUrl(product) {
   return product.image_url ? API + '/' + product.image_url : null;
@@ -87,7 +88,7 @@ function ProductModal({ product, icon, inCartQty, onAdd, onClose }) {
                       <div className="review-head">
                         <Stars value={r.rating} />
                         <strong>{r.reviewer}</strong>
-                        <small>{r.created_at.slice(0, 10)}</small>
+                        <small>{formatDate(r.created_at)}</small>
                       </div>
                       {r.comment && <p>{r.comment}</p>}
                     </li>

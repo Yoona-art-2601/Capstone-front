@@ -5,6 +5,8 @@ import { PageShell } from './Layout';
 import { Stars, StarInput } from './Stars';
 import { clearSavedCart } from './cartStorage';
 import { API } from './api';
+import { formatDateTime, formatShortDateTime, formatSlot } from './format';
+import { productImageUrl } from './ProductModal';
 
 const PAYMENT_LABELS = { Stripe: 'Online payment', COD: 'Cash on delivery', PayAtStore: 'Pay at store' };
 
@@ -20,12 +22,6 @@ function statusLabel(order) {
   return { text: stepLabel(order.status, order.delivery_type), cls: order.status.toLowerCase().replace(/\s+/g, '-') };
 }
 
-function formatTime(value) {
-  if (!value) return '';
-  const d = new Date(value.replace(' ', 'T'));
-  return d.toLocaleString('en-MY', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
-}
-
 function OrderTimeline({ order }) {
   const steps = order.steps || ['Pending', 'Processing', 'Out for Delivery', 'Completed'];
   const history = order.history || [];
@@ -37,7 +33,7 @@ function OrderTimeline({ order }) {
     const cancel = [...history].reverse().find(h => h.status === 'Cancelled');
     return (
       <div className="timeline-cancelled">
-        Cancelled {cancel ? formatTime(cancel.changed_at) : ''}{cancel && cancel.note ? ' · ' + cancel.note : ''}
+        Cancelled {cancel ? formatShortDateTime(cancel.changed_at) : ''}{cancel && cancel.note ? ' · ' + cancel.note : ''}
       </div>
     );
   }
@@ -53,7 +49,7 @@ function OrderTimeline({ order }) {
           <li key={step} className={'timeline-step ' + state}>
             <span className="timeline-dot">{state === 'todo' ? i + 1 : '✓'}</span>
             <span className="timeline-label">{stepLabel(step, order.delivery_type)}</span>
-            <small>{reachedAt[step] ? formatTime(reachedAt[step]) : ''}</small>
+            <small>{reachedAt[step] ? formatShortDateTime(reachedAt[step]) : ''}</small>
           </li>
         );
       })}
@@ -259,7 +255,7 @@ function MyOrders() {
                 <span className={'order-status ' + status.cls}>{status.text}</span>
               </div>
               <div className="order-meta">
-                {order.order_date} &middot; 📍 {order.branch_name || '-'}
+                {formatDateTime(order.order_date)} &middot; 📍 {order.branch_name || '-'}
               </div>
               <div className="order-meta">
                 {order.delivery_type === 'Pickup' ? 'Self pickup' : 'Home delivery'}
@@ -269,7 +265,7 @@ function MyOrders() {
                   : order.payment_status === 'Paid'
                     ? (order.payment_method === 'Stripe' ? 'Paid online' : 'Paid')
                     : PAYMENT_LABELS[order.payment_method] || order.payment_method}
-                {order.slot_date && <> · {order.delivery_type === 'Pickup' ? 'Pickup' : 'Delivery'} {order.slot_date} {order.slot_time}</>}
+                {order.slot_date && <> · {order.delivery_type === 'Pickup' ? 'Pickup' : 'Delivery'} {formatSlot(order.slot_date, order.slot_time)}</>}
               </div>
 
               <OrderTimeline order={order} />
@@ -278,7 +274,7 @@ function MyOrders() {
                 <tbody>
                   {order.items.map((item, i) => (
                     <tr key={i}>
-                      <td>{productIcon(item)} {item.name} &times; {item.quantity}</td>
+                      <td><span className="order-item-name"><span className="order-thumb">{productImageUrl(item) ? <img src={productImageUrl(item)} alt="" loading="lazy" /> : productIcon(item)}</span>{item.name} &times; {item.quantity}</span></td>
                       <td className="num">RM {Number(item.subtotal).toFixed(2)}</td>
                     </tr>
                   ))}
@@ -319,7 +315,7 @@ function MyOrders() {
               {(canPay(order) || canCancel(order)) && (
                 <div className="order-actions">
                   {canPay(order) && order.pay_before && (
-                    <span className="pay-before">Pay before {formatTime(order.pay_before)}</span>
+                    <span className="pay-before">Pay before {formatShortDateTime(order.pay_before)}</span>
                   )}
                   {canCancel(order) && (
                     <button className="btn btn-ghost btn-sm" onClick={() => cancelOrder(order)}>Cancel order</button>

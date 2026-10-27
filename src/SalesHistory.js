@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { API, rm } from './api';
+import { formatDate } from './format';
 
 function isoDate(d) {
   const pad = (n) => String(n).padStart(2, '0');
@@ -181,7 +182,7 @@ function SalesHistory({ branchId }) {
                     <div className="share-bar"><span style={{ width: r.share + '%' }} /></div>
                     <small>{r.share}%</small>
                   </td>
-                  <td>{r.last_sale}</td>
+                  <td className="nowrap">{formatDate(r.last_sale)}</td>
                 </tr>
               ))}
             </tbody>

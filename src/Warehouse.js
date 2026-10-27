@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { API, postJSON } from './api';
+import { formatDateTime } from './format';
 
 function localNow(offsetHours = 0) {
   const d = new Date(Date.now() + offsetHours * 3600 * 1000);
@@ -203,9 +204,9 @@ function Warehouse({ branches, onChange }) {
               <td>
                 <span className={'pill ' + (d.status === 'Received' ? 'paid' : d.status === 'Cancelled' ? 'cancelled' : 'unpaid')}>{d.status}</span>
               </td>
-              <td className="nowrap">{d.dispatched_at.slice(0, 16)}<br /><small>{d.dispatched_by}</small></td>
-              <td className="nowrap">{d.expected_arrival ? d.expected_arrival.slice(0, 16) : '-'}</td>
-              <td className="nowrap">{d.status === 'Received' ? <>{d.received_at.slice(0, 16)}<br /><small>{d.received_by}</small></> : '-'}</td>
+              <td className="nowrap">{formatDateTime(d.dispatched_at)}<br /><small>{d.dispatched_by}</small></td>
+              <td className="nowrap">{d.expected_arrival ? formatDateTime(d.expected_arrival) : '-'}</td>
+              <td className="nowrap">{d.status === 'Received' ? <>{formatDateTime(d.received_at)}<br /><small>{d.received_by}</small></> : '-'}</td>
               <td className="nowrap">
                 {d.status === 'In Transit' ? (
                   <>
@@ -251,7 +252,7 @@ function Warehouse({ branches, onChange }) {
               <td>{r.quantity}</td>
               <td>{r.supplier}</td>
               <td>{r.reference || '-'}</td>
-              <td className="nowrap">{r.received_at.slice(0, 16)}</td>
+              <td className="nowrap">{formatDateTime(r.received_at)}</td>
               <td>{r.received_by}</td>
             </tr>
           ))}

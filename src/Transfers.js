@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { API } from './api';
+import { formatDateTime } from './format';
 
 function Transfers({ branchId, onChange }) {
   const [branches, setBranches] = useState([]);
@@ -186,7 +187,7 @@ function Transfers({ branchId, onChange }) {
           )}
           {transfers.map(t => (
             <tr key={t.transfer_id}>
-              <td>{t.transfer_date}</td>
+              <td className="nowrap">{formatDateTime(t.transfer_date)}</td>
               <td>{t.name}</td>
               <td>{t.from_branch_name}</td>
               <td>{t.to_branch_name}</td>

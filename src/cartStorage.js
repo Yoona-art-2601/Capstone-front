@@ -33,8 +33,11 @@ function readCarts() {
   return saved.carts && typeof saved.carts === 'object' ? saved.carts : {};
 }
 
+export const CART_EVENT = 'beaconmart-cart-change';
+
 function writeCarts(carts) {
   write(CART_KEY, { carts });
+  window.dispatchEvent(new Event(CART_EVENT));
 }
 
 export function loadSavedCart(branchId) {
