@@ -158,21 +158,26 @@ function MyOrders() {
     if ([...params.keys()].length) window.history.replaceState({}, '', '/my-orders');
   }, []);
 
+  const [pageCount, setPageCount] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+
   const loadOrders = useCallback(() => {
-    fetch(API + '/orders/my_orders.php', { credentials: 'include' })
-      .then(res => res.json())
-      .then(result => {
-        if (result.success) {
-          setOrders(result.data);
-        } else if (result.message === 'Please login first') {
+    const pages = Array.from({ length: pageCount }, (_, i) => i + 1);
+    Promise.all(pages.map(p => fetch(API + '/orders/my_orders.php?page=' + p, { credentials: 'include' }).then(res => res.json())))
+      .then(results => {
+        const failed = results.find(r => !r.success);
+        if (!failed) {
+          setOrders(results.flatMap(r => r.data));
+          setHasMore(results[results.length - 1].has_more);
+        } else if (failed.message === 'Please login first') {
           setLoggedIn(false);
         } else {
-          setError(result.message);
+          setError(failed.message);
         }
       })
       .catch(() => setError('Cannot connect to server.'))
       .finally(() => setLoading(false));
-  }, []);
+  }, [pageCount]);
 
   useEffect(() => {
     loadOrders();
@@ -330,6 +335,11 @@ function MyOrders() {
             </div>
           );
         })}
+        {hasMore && (
+          <div className="load-more">
+            <button className="btn btn-ghost" onClick={() => setPageCount(n => n + 1)}>Show older orders</button>
+          </div>
+        )}
       </div>
     </PageShell>
   );
