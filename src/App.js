@@ -5,6 +5,8 @@ import Stores from './Stores';
 import InfoPage, { INFO_PATHS } from './InfoPage';
 import CartPage from './CartPage';
 import AccountPage from './AccountPage';
+import AttendancePage from './AttendancePage';
+import AttendanceKiosk from './AttendanceKiosk';
 
 function App() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -13,6 +15,8 @@ function App() {
   if (path === '/stores') return <Stores />;
   if (path === '/cart') return <CartPage />;
   if (path === '/account') return <AccountPage />;
+  if (path === '/attendance') return <AttendancePage />;
+  if (path === '/attendance-qr') return <AttendanceKiosk />;
   if (INFO_PATHS.includes(path)) return <InfoPage path={path} />;
   return <Store />;
 }

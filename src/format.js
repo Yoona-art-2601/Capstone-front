@@ -30,3 +30,8 @@ export function formatSlot(date, slot) {
   const day = d.toLocaleDateString(LOCALE, { weekday: 'short', day: 'numeric', month: 'short' });
   return slot ? day + ', ' + slot.replace('-', ' – ') : day;
 }
+
+export function formatMinutes(minutes) {
+  const m = Math.max(0, Math.round(Number(minutes) || 0));
+  return m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60) + 'm' : m + ' min';
+}

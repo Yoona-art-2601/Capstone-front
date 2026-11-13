@@ -8,6 +8,7 @@ import Dashboard from './Dashboard';
 import Login from './Login';
 import NotificationBell from './NotificationBell';
 import AuditTrail from './AuditTrail';
+import Attendance from './Attendance';
 import { API } from './api';
 
 const TABS = [
@@ -16,10 +17,11 @@ const TABS = [
   { key: 'transfers', label: 'Stock Transfers' },
   { key: 'warehouse', label: 'Warehouse' },
   { key: 'dashboard', label: 'Dashboard' },
+  { key: 'attendance', label: 'Attendance' },
   { key: 'audit', label: 'Audit Trail' },
 ];
 
-const BRANCH_TABS = ['orders', 'inventory', 'transfers', 'dashboard'];
+const BRANCH_TABS = ['orders', 'inventory', 'transfers', 'dashboard', 'attendance'];
 
 function Admin() {
   const [user, setUser] = useState(null);
@@ -136,6 +138,7 @@ function AdminPanel({ user, onLogout }) {
           <Warehouse branches={branches} onChange={() => setRefreshKey(k => k + 1)} />
         )}
         {tab === 'dashboard' && <Dashboard branchId={branchId} />}
+        {tab === 'attendance' && <Attendance branchId={branchId} branches={branches} />}
         {tab === 'audit' && <AuditTrail />}
       </main>
     </div>

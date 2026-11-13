@@ -148,3 +148,7 @@ button.danger { color: #dc3545; }
   .login-box { width: 100%; max-width: 320px; box-sizing: border-box; }
   .login-page { padding: 16px; box-sizing: border-box; }
 }
+
+.attendance-fix { flex-wrap: wrap; margin: 0; }
+.attendance-fix input { padding: 4px 6px; }
+.attendance-fix label:nth-child(2) input { width: 320px; max-width: 100%; }

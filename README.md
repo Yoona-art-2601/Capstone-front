@@ -21,6 +21,8 @@ npm start
 | My Orders | http://localhost:3000/my-orders |
 | My Account | http://localhost:3000/account |
 | Store locations | http://localhost:3000/stores |
+| Staff clock in / out | http://localhost:3000/attendance |
+| Branch attendance QR screen (admin) | http://localhost:3000/attendance-qr?branch=1 |
 | Admin panel | http://localhost:3000/admin |
 
 To use a different backend address, set `REACT_APP_API_URL` before starting, for example in a `.env.local` file:
