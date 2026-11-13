@@ -7,6 +7,30 @@ import './App.css';
 
 let settingsPromise = null;
 
+let branchesPromise = null;
+
+export function useBranches() {
+  const [branches, setBranches] = useState([]);
+  useEffect(() => {
+    if (!branchesPromise) {
+      branchesPromise = fetch(API + '/branches/get_branches.php')
+        .then(res => res.json())
+        .then(result => (result.success ? result.data : []))
+        .catch(() => []);
+    }
+    branchesPromise.then(setBranches);
+  }, []);
+  return branches;
+}
+
+export function BranchHours() {
+  const branches = useBranches();
+  if (!branches.length) return null;
+  const same = branches.every(b => b.opening_hours === branches[0].opening_hours);
+  if (same) return <span>{branches[0].opening_hours}</span>;
+  return branches.map(b => <span key={b.branch_id}>{b.branch_name.replace(/^Beacon Mart /, '')}: {b.opening_hours}</span>);
+}
+
 export function useShopSettings() {
   const [settings, setSettings] = useState(null);
   useEffect(() => {
@@ -150,7 +174,7 @@ export function SiteFooter() {
         <div>
           <h4>Customer Service</h4>
           <a href="/contact">Contact Us</a>
-          <span>Mon - Sat, 8:00am - 6:00pm</span>
+          <BranchHours />
           <span>🔒 Secure payment by Stripe</span>
         </div>
       </div>

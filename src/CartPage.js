@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
-import { PageShell, useShopSettings } from './Layout';
+import { PageShell, useShopSettings, useBranches } from './Layout';
+import { formatClock } from './format';
 import CustomerAuth from './CustomerAuth';
 import { productImageUrl } from './ProductModal';
 import { productIcon, withPricing } from './store';
@@ -21,7 +22,8 @@ const PAYMENT_OPTIONS = {
 function CartPage() {
   const branchId = useRef(loadSavedBranch() || 1).current;
   const settings = useShopSettings();
-  const [branchName, setBranchName] = useState('');
+  const branch = useBranches().find(b => b.branch_id === branchId) || {};
+  const branchName = branch.branch_name || '';
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
@@ -63,14 +65,6 @@ function CartPage() {
         hydrated.current = true;
         setLoading(false);
       });
-
-    fetch(API + '/branches/get_branches.php')
-      .then(res => res.json())
-      .then(result => {
-        const branch = result.success && result.data.find(b => b.branch_id === branchId);
-        if (branch) setBranchName(branch.branch_name);
-      })
-      .catch(() => {});
 
     fetch(API + '/shop/get_slots.php?branch_id=' + branchId)
       .then(res => res.json())
@@ -391,7 +385,7 @@ function CartPage() {
                   )}
                   <p className="hint">
                     Same-day {deliveryType === 'Delivery' ? 'delivery' : 'pickup'} is only available for orders placed before
-                    {' '}{settings ? settings.same_day_cutoff.replace(/^15:00$/, '3:00pm') : '3:00pm'}. Closed on Sundays.
+                    {' '}{settings ? formatClock(settings.same_day_cutoff) : '3:00 pm'}.{branch.opening_hours ? ' ' + branchName + ' opening hours: ' + branch.opening_hours + '.' : ''}
                   </p>
                 </section>
 

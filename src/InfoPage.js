@@ -1,4 +1,5 @@
-import { PageShell, useShopSettings } from './Layout';
+import { PageShell, useShopSettings, useBranches } from './Layout';
+import { formatClock } from './format';
 import { rm } from './api';
 
 function AboutUs() {
@@ -66,6 +67,7 @@ function ContactUs({ settings }) {
 }
 
 function DeliveryPolicy({ settings }) {
+  const branches = useBranches();
   return (
     <>
       <h1>Delivery Policy</h1>
@@ -91,9 +93,12 @@ function DeliveryPolicy({ settings }) {
         <h2>Time slots</h2>
         <p>
           Choose a 2-hour delivery or pickup slot at checkout, up to a week ahead.
-          {settings && ' Same-day slots are only available for orders placed before ' + settings.same_day_cutoff + '.'}
-          {' '}Branches are closed on Sundays.
+          {settings && ' Same-day slots are only available for orders placed before ' + formatClock(settings.same_day_cutoff) + '.'}
+          {' '}Slots are only offered while the branch is open:
         </p>
+        <ul>
+          {branches.map(b => <li key={b.branch_id}>{b.branch_name}: {b.opening_hours}</li>)}
+        </ul>
         <h2>Fulfilment</h2>
         <p>
           Each order is prepared by the branch you selected at checkout, using that branch's stock. You can follow

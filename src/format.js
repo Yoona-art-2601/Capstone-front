@@ -35,3 +35,10 @@ export function formatMinutes(minutes) {
   const m = Math.max(0, Math.round(Number(minutes) || 0));
   return m >= 60 ? Math.floor(m / 60) + 'h ' + (m % 60) + 'm' : m + ' min';
 }
+
+export function formatClock(hhmm) {
+  const m = /^(\d{1,2}):(\d{2})/.exec(String(hhmm || ''));
+  if (!m) return String(hhmm || '');
+  const h = Number(m[1]);
+  return (h % 12 || 12) + ':' + m[2] + ' ' + (h >= 12 ? 'pm' : 'am');
+}
