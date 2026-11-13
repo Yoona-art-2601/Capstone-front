@@ -29,7 +29,8 @@ function AttendancePage() {
         if (httpCode === 403) return setState({ loading: false, status: null, error: '', blocked: 'customer' });
         if (!body.success) return setState({ loading: false, status: null, error: body.message, blocked: '' });
         setState({ loading: false, status: body, error: '', blocked: '' });
-        if (body.record) setBranchId(id => id || Number(body.record.branch_id));
+        if (body.my_branch_id) setBranchId(Number(body.my_branch_id));
+        else if (body.record) setBranchId(id => id || Number(body.record.branch_id));
       })
       .catch(() => setState({ loading: false, status: null, error: 'Cannot connect to server.', blocked: '' }));
   }, []);
@@ -107,7 +108,7 @@ function AttendancePage() {
                 <div className="field-grid">
                   <label>
                     Branch
-                    <select value={branchId} onChange={(e) => setBranchId(Number(e.target.value))} disabled={action === 'out'}>
+                    <select value={branchId} onChange={(e) => setBranchId(Number(e.target.value))} disabled={action === 'out' || !!status.my_branch_id}>
                       <option value="">Choose branch</option>
                       {status.branches.map(b => <option key={b.branch_id} value={b.branch_id}>{b.branch_name}</option>)}
                     </select>

@@ -9,19 +9,22 @@ import Login from './Login';
 import NotificationBell from './NotificationBell';
 import AuditTrail from './AuditTrail';
 import Attendance from './Attendance';
+import Users from './Users';
 import { API } from './api';
 
 const TABS = [
-  { key: 'orders', label: 'Orders' },
-  { key: 'inventory', label: 'Inventory' },
+  { key: 'orders', label: 'Orders', staff: true },
+  { key: 'inventory', label: 'Inventory', staff: true },
   { key: 'transfers', label: 'Stock Transfers' },
   { key: 'warehouse', label: 'Warehouse' },
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'attendance', label: 'Attendance' },
+  { key: 'users', label: 'Users' },
   { key: 'audit', label: 'Audit Trail' },
 ];
 
 const BRANCH_TABS = ['orders', 'inventory', 'transfers', 'dashboard', 'attendance'];
+const PANEL_ROLES = ['Admin', 'Staff'];
 
 function Admin() {
   const [user, setUser] = useState(null);
@@ -31,7 +34,7 @@ function Admin() {
     fetch(API + '/auth/me.php', { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
-        if (result.success && result.user.role === 'Admin') setUser(result.user);
+        if (result.success && PANEL_ROLES.includes(result.user.role)) setUser(result.user);
       })
       .catch(err => console.error('Error checking login:', err))
       .finally(() => setChecking(false));
@@ -42,15 +45,23 @@ function Admin() {
       .finally(() => setUser(null));
   };
 
+  const handleLogin = () => {
+    fetch(API + '/auth/me.php', { credentials: 'include' })
+      .then(res => res.json())
+      .then(result => { if (result.success) setUser(result.user); });
+  };
+
   if (checking) return <div className="login-page">Loading...</div>;
-  if (!user) return <Login onLogin={setUser} />;
+  if (!user) return <Login onLogin={handleLogin} />;
   return <AdminPanel user={user} onLogout={handleLogout} />;
 }
 
 function AdminPanel({ user, onLogout }) {
+  const isStaff = user.role === 'Staff';
+  const tabs = TABS.filter(t => !isStaff || t.staff);
   const [tab, setTab] = useState('orders');
   const [branches, setBranches] = useState([]);
-  const [branchId, setBranchId] = useState('all');
+  const [branchId, setBranchId] = useState(isStaff ? user.branch_id : 'all');
   const [lowStockCount, setLowStockCount] = useState(0);
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -75,9 +86,9 @@ function AdminPanel({ user, onLogout }) {
 
   const openLink = (link) => {
     const [key, query] = link.split('?');
-    if (!TABS.some(t => t.key === key)) return;
+    if (!tabs.some(t => t.key === key)) return;
     const branch = Number(new URLSearchParams(query || '').get('branch'));
-    if (branch) setBranchId(branch);
+    if (branch && !isStaff) setBranchId(branch);
     setTab(key);
   };
 
@@ -86,9 +97,11 @@ function AdminPanel({ user, onLogout }) {
   return (
     <div className="admin">
       <header className="admin-header">
-        <h1>Beacon Mart Admin</h1>
+        <h1>Beacon Mart {isStaff ? 'Staff' : 'Admin'}</h1>
         <div className="admin-header-right">
-          {usesBranch ? (
+          {isStaff ? (
+            <span className="admin-scope">{user.branch_name}</span>
+          ) : usesBranch ? (
             <label>
               Branch:{' '}
               <select
@@ -105,6 +118,7 @@ function AdminPanel({ user, onLogout }) {
             <span className="admin-scope">All branches</span>
           )}
           <a href="/" className="admin-link">&larr; Back to store</a>
+          <a href="/attendance" className="admin-link">Clock in / out</a>
           <NotificationBell variant="admin" onOpenLink={openLink} />
           <a href="/account" className="admin-user" title="My account and password">{user.name}</a>
           <button className="logout-btn" onClick={onLogout}>Logout</button>
@@ -112,7 +126,7 @@ function AdminPanel({ user, onLogout }) {
       </header>
 
       <nav className="admin-tabs">
-        {TABS.map(t => (
+        {tabs.map(t => (
           <button
             key={t.key}
             className={tab === t.key ? 'active' : ''}
@@ -129,7 +143,7 @@ function AdminPanel({ user, onLogout }) {
       <main className="admin-content">
         {tab === 'orders' && <Orders branchId={branchId} />}
         {tab === 'inventory' && (
-          <Inventory branchId={branchId} onChange={() => setRefreshKey(k => k + 1)} />
+          <Inventory branchId={branchId} canManage={!isStaff} onChange={() => setRefreshKey(k => k + 1)} />
         )}
         {tab === 'transfers' && (
           <Transfers branchId={branchId} onChange={() => setRefreshKey(k => k + 1)} />
@@ -139,6 +153,7 @@ function AdminPanel({ user, onLogout }) {
         )}
         {tab === 'dashboard' && <Dashboard branchId={branchId} />}
         {tab === 'attendance' && <Attendance branchId={branchId} branches={branches} />}
+        {tab === 'users' && <Users branches={branches} me={user} />}
         {tab === 'audit' && <AuditTrail />}
       </main>
     </div>

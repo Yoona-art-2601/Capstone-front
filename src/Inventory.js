@@ -96,7 +96,7 @@ function ProductDetails({ product, onDone }) {
   );
 }
 
-function ProductRow({ product, branchId, onDone }) {
+function ProductRow({ product, branchId, canManage, onDone }) {
   const [showDetails, setShowDetails] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
@@ -271,7 +271,9 @@ function ProductRow({ product, branchId, onDone }) {
         <button onClick={applyAdjust}>Apply</button>
       </td>
       <td>
-        {editing ? (
+        {!canManage ? (
+          <small className="muted">Admin only</small>
+        ) : editing ? (
           <>
             <button onClick={saveEdit}>Save</button>{' '}
             <button onClick={() => setEditing(false)}>Cancel</button>
@@ -290,7 +292,7 @@ function ProductRow({ product, branchId, onDone }) {
   );
 }
 
-function Inventory({ branchId, onChange }) {
+function Inventory({ branchId, canManage = true, onChange }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
@@ -364,14 +366,15 @@ function Inventory({ branchId, onChange }) {
         {categories.map(c => <option key={c} value={c} />)}
       </datalist>
       <div className="toolbar">
-        <button onClick={() => setShowAdd(!showAdd)}>{showAdd ? 'Close' : '+ Add product'}</button>
+        {canManage && <button onClick={() => setShowAdd(!showAdd)}>{showAdd ? 'Close' : '+ Add product'}</button>}
         <button onClick={loadProducts}>Refresh</button>
         <span>{products.length} product(s)</span>
       </div>
 
       <p className="hint-line">
-        Regular restocking comes from the central warehouse: use the Warehouse tab to ship stock to this branch.
-        Stock In here is only for deliveries that arrive at the branch directly.
+        {canManage
+          ? 'Regular restocking comes from the central warehouse: use the Warehouse tab to ship stock to this branch. Stock In here is only for deliveries that arrive at the branch directly.'
+          : 'Shipments from the central warehouse are added by an admin when they arrive. Use Stock In only for deliveries that come straight to this branch, and Stock Out for damaged or expired items.'}
       </p>
 
       {lowCount > 0 && (
@@ -382,7 +385,7 @@ function Inventory({ branchId, onChange }) {
 
       {message && <div className="notice">{message}</div>}
 
-      {showAdd && (
+      {canManage && showAdd && (
         <div className="form-box">
           <h3>New product</h3>
           <div className="form-grid">
@@ -427,6 +430,7 @@ function Inventory({ branchId, onChange }) {
                 key={product.product_id}
                 product={product}
                 branchId={branchId}
+                canManage={canManage}
                 onDone={handleDone}
               />
             ))}

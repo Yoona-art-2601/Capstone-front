@@ -66,11 +66,13 @@ function AccountPage() {
               <dl className="account-details">
                 <dt>Name</dt><dd>{user.name}</dd>
                 <dt>Email</dt><dd>{user.email}</dd>
-                <dt>Account type</dt><dd>{user.role === 'Admin' ? 'Administrator' : 'Customer'}</dd>
+                <dt>Account type</dt><dd>{user.role === 'Admin' ? 'Administrator' : user.role === 'Staff' ? 'Staff' : 'Customer'}</dd>
+                {user.role === 'Staff' && <><dt>Branch</dt><dd>{user.branch_name || '-'}</dd></>}
               </dl>
               <div className="account-links">
                 <a href="/my-orders" className="btn btn-ghost btn-sm">My Orders</a>
-                {user.role === 'Admin' && <a href="/admin" className="btn btn-ghost btn-sm">Admin panel</a>}
+                {user.role !== 'Customer' && <a href="/admin" className="btn btn-ghost btn-sm">{user.role === 'Admin' ? 'Admin panel' : 'Staff panel'}</a>}
+                {user.role !== 'Customer' && <a href="/attendance" className="btn btn-ghost btn-sm">Clock in / out</a>}
                 <button className="btn btn-ghost btn-sm" onClick={logout}>Logout</button>
               </div>
             </section>

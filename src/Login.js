@@ -21,9 +21,9 @@ function Login({ onLogin }) {
       const result = await res.json();
       if (!result.success) {
         setError(result.message);
-      } else if (result.user.role !== 'Admin') {
+      } else if (!['Admin', 'Staff'].includes(result.user.role)) {
         await fetch(API + '/auth/logout.php', { credentials: 'include' });
-        setError('This account is not an admin account.');
+        setError('This account is not a staff or admin account.');
       } else {
         onLogin(result.user);
       }
@@ -36,7 +36,7 @@ function Login({ onLogin }) {
   return (
     <div className="login-page">
       <form className="login-box" onSubmit={handleSubmit}>
-        <h2>Beacon Mart Admin</h2>
+        <h2>Beacon Mart Staff Login</h2>
         {error && <div className="notice alert">{error}</div>}
         <label>
           Email
