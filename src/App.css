@@ -673,3 +673,5 @@ h3.clickable:hover { color: var(--green-700); text-decoration: underline; }
 .kiosk-card small { color: var(--muted); }
 .working-tag { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--green-100); color: var(--green-700); font-size: 12px; font-weight: 800; }
 .load-more { display: flex; justify-content: center; margin-top: 8px; }
+.notif-dot.shipment { background: #6772e5; }
+.auth-forgot { align-self: flex-end; margin-top: -4px; font-size: 13px; color: var(--green-700); font-weight: 700; }

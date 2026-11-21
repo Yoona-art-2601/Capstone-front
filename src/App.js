@@ -7,6 +7,7 @@ import CartPage from './CartPage';
 import AccountPage from './AccountPage';
 import AttendancePage from './AttendancePage';
 import AttendanceKiosk from './AttendanceKiosk';
+import { ForgotPasswordPage, ResetPasswordPage } from './PasswordPages';
 
 function App() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -17,6 +18,8 @@ function App() {
   if (path === '/account') return <AccountPage />;
   if (path === '/attendance') return <AttendancePage />;
   if (path === '/attendance-qr') return <AttendanceKiosk />;
+  if (path === '/forgot-password') return <ForgotPasswordPage />;
+  if (path === '/reset-password') return <ResetPasswordPage />;
   if (INFO_PATHS.includes(path)) return <InfoPage path={path} />;
   return <Store />;
 }

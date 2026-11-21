@@ -75,6 +75,7 @@ function CustomerAuth({ onLogin, onClose }) {
           />
         </label>
         {mode === 'register' && <small className="auth-hint">At least 8 characters</small>}
+        {mode === 'login' && <a href="/forgot-password" className="auth-forgot">Forgot password?</a>}
 
         <button type="submit" className="auth-submit" disabled={submitting}>
           {submitting ? 'Please wait...' : mode === 'login' ? 'Login' : 'Create account'}

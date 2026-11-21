@@ -10,20 +10,24 @@ import NotificationBell from './NotificationBell';
 import AuditTrail from './AuditTrail';
 import Attendance from './Attendance';
 import Users from './Users';
+import Branches from './Branches';
+import Incoming from './Incoming';
 import { API } from './api';
 
 const TABS = [
   { key: 'orders', label: 'Orders', staff: true },
   { key: 'inventory', label: 'Inventory', staff: true },
+  { key: 'incoming', label: 'Incoming stock', staff: true },
   { key: 'transfers', label: 'Stock Transfers' },
   { key: 'warehouse', label: 'Warehouse' },
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'attendance', label: 'Attendance' },
   { key: 'users', label: 'Users' },
+  { key: 'branches', label: 'Branches' },
   { key: 'audit', label: 'Audit Trail' },
 ];
 
-const BRANCH_TABS = ['orders', 'inventory', 'transfers', 'dashboard', 'attendance'];
+const BRANCH_TABS = ['orders', 'inventory', 'incoming', 'transfers', 'dashboard', 'attendance'];
 const PANEL_ROLES = ['Admin', 'Staff'];
 
 function Admin() {
@@ -40,6 +44,32 @@ function Admin() {
       .finally(() => setChecking(false));
   }, []);
 
+  const [switchNotice, setSwitchNotice] = useState('');
+
+  useEffect(() => {
+    if (!user) return undefined;
+    const check = () => {
+      if (document.hidden) return;
+      fetch(API + '/auth/me.php', { credentials: 'include' })
+        .then(res => res.json())
+        .then(result => {
+          const now = result.success ? result.user : null;
+          if (now && now.user_id === user.user_id && PANEL_ROLES.includes(now.role)) return;
+          setSwitchNotice(now
+            ? 'This browser is now logged in as ' + now.name + ' (' + now.role + ') in another tab, so you were signed out of the panel. One browser keeps one login at a time: use a private window to test a second account.'
+            : 'Your session has ended. Please log in again.');
+          setUser(null);
+        })
+        .catch(() => {});
+    };
+    window.addEventListener('focus', check);
+    document.addEventListener('visibilitychange', check);
+    return () => {
+      window.removeEventListener('focus', check);
+      document.removeEventListener('visibilitychange', check);
+    };
+  }, [user]);
+
   const handleLogout = () => {
     fetch(API + '/auth/logout.php', { credentials: 'include' })
       .finally(() => setUser(null));
@@ -48,11 +78,16 @@ function Admin() {
   const handleLogin = () => {
     fetch(API + '/auth/me.php', { credentials: 'include' })
       .then(res => res.json())
-      .then(result => { if (result.success) setUser(result.user); });
+      .then(result => {
+        if (result.success) {
+          setSwitchNotice('');
+          setUser(result.user);
+        }
+      });
   };
 
   if (checking) return <div className="login-page">Loading...</div>;
-  if (!user) return <Login onLogin={handleLogin} />;
+  if (!user) return <Login onLogin={handleLogin} notice={switchNotice} />;
   return <AdminPanel user={user} onLogout={handleLogout} />;
 }
 
@@ -145,6 +180,7 @@ function AdminPanel({ user, onLogout }) {
         {tab === 'inventory' && (
           <Inventory branchId={branchId} canManage={!isStaff} onChange={() => setRefreshKey(k => k + 1)} />
         )}
+        {tab === 'incoming' && <Incoming branchId={branchId} onChange={() => setRefreshKey(k => k + 1)} />}
         {tab === 'transfers' && (
           <Transfers branchId={branchId} onChange={() => setRefreshKey(k => k + 1)} />
         )}
@@ -154,6 +190,7 @@ function AdminPanel({ user, onLogout }) {
         {tab === 'dashboard' && <Dashboard branchId={branchId} />}
         {tab === 'attendance' && <Attendance branchId={branchId} branches={branches} />}
         {tab === 'users' && <Users branches={branches} me={user} />}
+        {tab === 'branches' && <Branches />}
         {tab === 'audit' && <AuditTrail />}
       </main>
     </div>

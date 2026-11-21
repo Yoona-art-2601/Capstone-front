@@ -162,3 +162,12 @@ button.danger { color: #dc3545; }
 .order-history { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 4px; }
 .order-history li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
 .order-history small { color: #777; }
+
+.branch-form .branch-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 14px; }
+.branch-form .branch-grid .wide { grid-column: span 2; }
+.branch-form .branch-grid input, .branch-form .branch-grid select { width: 100%; box-sizing: border-box; padding: 6px 8px; }
+.branch-form small { display: block; color: #666; margin: 6px 0 8px; }
+.checkbox-line { display: flex; gap: 6px; align-items: center; font-size: 13px; margin-bottom: 10px; }
+@media (max-width: 800px) {
+  .branch-form .branch-grid { grid-template-columns: 1fr 1fr; }
+}

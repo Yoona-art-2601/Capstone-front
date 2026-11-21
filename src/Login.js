@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { API } from './api';
 
-function Login({ onLogin }) {
+function Login({ onLogin, notice }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -37,6 +37,7 @@ function Login({ onLogin }) {
     <div className="login-page">
       <form className="login-box" onSubmit={handleSubmit}>
         <h2>Beacon Mart Staff Login</h2>
+        {notice && !error && <div className="notice">{notice}</div>}
         {error && <div className="notice alert">{error}</div>}
         <label>
           Email
@@ -49,6 +50,7 @@ function Login({ onLogin }) {
         <button type="submit" disabled={submitting}>
           {submitting ? 'Logging in...' : 'Login'}
         </button>
+        <a href="/forgot-password" className="login-back">Forgot password?</a>
         <a href="/" className="login-back">&larr; Back to store</a>
       </form>
     </div>
