@@ -84,10 +84,12 @@
 .topbar-actions { margin-left: auto; display: flex; align-items: center; gap: 8px; }
 .greeting { font-weight: 700; color: var(--green-900); margin-right: 4px; }
 .cart-button {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--green-700); color: white; border: none;
-  border-radius: 999px; padding: 8px 14px; font-size: 16px; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 8px; min-height: 40px; box-sizing: border-box;
+  background: var(--green-700); color: white; border: none; text-decoration: none;
+  border-radius: 999px; padding: 0 12px 0 14px; font-size: 16px; line-height: 1; cursor: pointer;
 }
+.cart-button:hover { background: var(--green-900); }
+.cart-button svg { display: block; flex-shrink: 0; }
 .cart-count {
   display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 6px;
   border-radius: 999px; background: #f4c04f; color: var(--green-900);
@@ -602,7 +604,7 @@ h3.clickable:hover { color: var(--green-700); text-decoration: underline; }
   .brand-name { font-size: 18px; }
   .brand-mark { width: 36px; height: 36px; font-size: 20px; }
   .topbar-actions { gap: 6px; }
-  .cart-button { padding: 8px 12px; }
+  .cart-button { padding: 0 10px 0 12px; gap: 6px; }
 }
 .admin-user { text-decoration: none; }
 .admin-user:hover { text-decoration: underline; }
@@ -675,3 +677,13 @@ h3.clickable:hover { color: var(--green-700); text-decoration: underline; }
 .load-more { display: flex; justify-content: center; margin-top: 8px; }
 .notif-dot.shipment { background: #6772e5; }
 .auth-forgot { align-self: flex-end; margin-top: -4px; font-size: 13px; color: var(--green-700); font-weight: 700; }
+.cart-login { margin-top: 12px; }
+
+.topbar-actions .btn, .account-link, .cart-button { white-space: nowrap; flex-shrink: 0; }
+.branch-picker { min-width: 0; flex: 0 1 auto; }
+.branch-picker select { min-width: 0; max-width: 220px; text-overflow: ellipsis; }
+@media (max-width: 1200px) {
+  .account-link { width: 40px; padding: 0; justify-content: center; }
+  .account-link .greeting { display: none; }
+}
+.brand-name, .brand-tag { white-space: nowrap; }

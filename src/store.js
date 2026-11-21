@@ -89,6 +89,7 @@ function Store() {
   const [notice, setNotice] = useState(null);
   const [user, setUser] = useState(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [pendingAdd, setPendingAdd] = useState(null);
   const [detailProduct, setDetailProduct] = useState(null);
   const [settings, setSettings] = useState(null);
 
@@ -128,7 +129,17 @@ function Store() {
   const handleLogin = (loggedInUser) => {
     setUser(loggedInUser);
     setShowAuth(false);
-    showNotice('Welcome, ' + loggedInUser.name + '!', 'success');
+    if (pendingAdd) {
+      putInCart(pendingAdd.product, pendingAdd.qty, 'Welcome, ' + loggedInUser.name + '! ' + pendingAdd.product.name + ' is in your cart.');
+      setPendingAdd(null);
+    } else {
+      showNotice('Welcome, ' + loggedInUser.name + '!', 'success');
+    }
+  };
+
+  const closeAuth = () => {
+    setShowAuth(false);
+    setPendingAdd(null);
   };
 
   const handleLogout = () => {
@@ -230,13 +241,24 @@ function Store() {
   };
 
   const addToCart = (product, qty = 1) => {
+    if (!user) {
+      setPendingAdd({ product, qty });
+      showNotice('Please log in or create an account first, so you can follow your order from the store to your door.');
+      setShowAuth(true);
+      return;
+    }
+    putInCart(product, qty);
+  };
+
+  const putInCart = (product, qty, message = null) => {
     const existing = cart.find(item => item.product_id === product.product_id);
     const currentQty = existing ? existing.quantity : 0;
     if (currentQty + qty > product.stock) {
       showNotice('Only ' + product.stock + ' of ' + product.name + ' available at this branch.', 'error');
       return;
     }
-    setNotice(null);
+    if (message) showNotice(message, 'success');
+    else setNotice(null);
     if (existing) {
       setCart(cart.map(item =>
         item.product_id === product.product_id
@@ -395,7 +417,7 @@ function Store() {
         }
       />
 
-      {showAuth && <CustomerAuth onLogin={handleLogin} onClose={() => setShowAuth(false)} />}
+      {showAuth && <CustomerAuth onLogin={handleLogin} onClose={closeAuth} />}
       {detailProduct && (
         <ProductModal
           product={detailProduct}
@@ -507,7 +529,14 @@ function Store() {
             <div className="cart-empty">
               <span>🧺</span>
               <p>Your cart is empty.</p>
-              <small>Add some fresh items to get started.</small>
+              {user ? (
+                <small>Add some fresh items to get started.</small>
+              ) : (
+                <>
+                  <small>Log in to add items, place orders and track where they are.</small>
+                  <button className="btn btn-primary btn-sm cart-login" onClick={() => setShowAuth(true)}>Login / Register</button>
+                </>
+              )}
             </div>
           ) : (
             <>

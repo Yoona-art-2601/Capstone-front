@@ -81,7 +81,12 @@ export function SiteHeader({ user, cartCount, onLogin, onLogout, middle }) {
           <button className="btn btn-ghost" onClick={onLogin}>Login / Register</button>
         )}
         <a href="/cart" className="cart-button" aria-label={'View cart, ' + cartCount + ' item(s)'}>
-          🛒 <span className="cart-count">{cartCount}</span>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="9" cy="20" r="1.4" />
+            <circle cx="18" cy="20" r="1.4" />
+            <path d="M2.5 3.5h3l2.4 11.2a1.5 1.5 0 0 0 1.5 1.2h8.4a1.5 1.5 0 0 0 1.5-1.1L21 8H6.6" />
+          </svg>
+          <span className="cart-count">{cartCount}</span>
         </a>
       </nav>
     </header>
