@@ -104,7 +104,7 @@ function SalesHistory({ branchId }) {
 
       autoTable(doc, {
         startY: doc.lastAutoTable.finalY + 20,
-        head: [['#', 'Product', 'Category', 'Units', 'Orders', 'Revenue', 'Share']],
+        head: [['#', 'Product', 'Category', 'Units', 'Orders', 'Revenue', '% of sales']],
         body: result.data.length
           ? result.data.map((r, i) => [i + 1, r.name, r.category || '-', r.units, r.orders, rm(r.revenue), r.share + '%'])
           : [['', 'No paid sales in this period', '', '', '', '', '']],
@@ -164,7 +164,7 @@ function SalesHistory({ branchId }) {
                 <th>Units sold</th>
                 <th>Orders</th>
                 <th>Revenue</th>
-                <th>Share</th>
+                <th>% of sales</th>
                 <th>Last sale</th>
               </tr>
             </thead>
