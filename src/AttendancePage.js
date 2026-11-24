@@ -66,7 +66,10 @@ function AttendancePage() {
     <PageShell>
       {showAuth && <CustomerAuth onLogin={() => { setShowAuth(false); load(); }} onClose={() => setShowAuth(false)} />}
       <div className="attendance-page">
-        <h1>Staff Attendance</h1>
+        <div className="attendance-head">
+          <h1>Staff Attendance</h1>
+          {status && <a href="/admin" className="btn btn-ghost">&larr; Back to admin panel</a>}
+        </div>
 
         {state.loading ? (
           <p className="message">Loading...</p>
@@ -116,12 +119,16 @@ function AttendancePage() {
                   <label>
                     Code from the QR
                     <input
-                      className="attendance-code" inputMode="text" maxLength={6} autoComplete="off" placeholder="A1B2C3"
+                      className="attendance-code" inputMode="text" maxLength={6} autoComplete="off" placeholder="Enter code"
                       value={code} onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^0-9A-F]/g, ''))}
                     />
                   </label>
                 </div>
-                <small className="hint">Scan the QR code at the branch to fill this in. The code changes every 2 minutes.</small>
+                <small className="hint">
+                  {action === 'out'
+                    ? 'At the end of your shift, scan the QR code at the branch again to get a new code, then press Clock out now.'
+                    : 'Scan the QR code at the branch to fill this in. The code changes every 2 minutes.'}
+                </small>
                 {message && <div className={'notice-bar ' + message.type}><span>{message.text}</span></div>}
                 <button type="submit" className="btn btn-primary btn-block" disabled={busy}>
                   {busy ? 'Please wait...' : action === 'in' ? 'Clock in now' : 'Clock out now'}

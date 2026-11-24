@@ -7,6 +7,25 @@ export function productImageUrl(product) {
   return product.image_url ? API + '/' + product.image_url : null;
 }
 
+function shortDate(value) {
+  return new Date(value.replace(' ', 'T')).toLocaleDateString('en-MY', { day: 'numeric', month: 'short' });
+}
+
+export function PromoNote({ product }) {
+  if (product.on_sale && product.sale_end) {
+    return <span className="promo-end">Promo ends {shortDate(product.sale_end)}</span>;
+  }
+  if (product.upcoming_sale != null) {
+    return (
+      <span className="promo-end promo-soon">
+        Promo {rm(product.upcoming_sale)} from {shortDate(product.sale_start)}
+        {product.sale_end ? ' to ' + shortDate(product.sale_end) : ''}
+      </span>
+    );
+  }
+  return null;
+}
+
 function ProductModal({ product, icon, inCartQty, onAdd, onClose }) {
   const [qty, setQty] = useState(1);
   const maxQty = Math.max(0, product.stock - inCartQty);
@@ -53,6 +72,7 @@ function ProductModal({ product, icon, inCartQty, onAdd, onClose }) {
             <span className={'price' + (product.on_sale ? ' sale' : '')}>{rm(product.unit_price)}</span>
             {product.on_sale && <span className="price-old">{rm(product.price)}</span>}
           </div>
+          <PromoNote product={product} />
           {product.description && <p className="modal-description">{product.description}</p>}
 
           {product.stock > 0 && (

@@ -19,11 +19,14 @@ function Pager({ page, pages, onChange }) {
   );
 }
 
+const STOCK_PER_PAGE = 10;
+
 function Warehouse({ branches, onChange }) {
   const [data, setData] = useState(null);
   const [message, setMessage] = useState('');
   const [receiptPage, setReceiptPage] = useState(1);
   const [dispatchPage, setDispatchPage] = useState(1);
+  const [stockPage, setStockPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
   const [inForm, setInForm] = useState({ product_id: '', quantity: '', supplier: '', reference: '', received_at: localNow() });
   const [outForm, setOutForm] = useState({ product_id: '', branch_id: '', quantity: '', expected_arrival: localNow(24), note: '' });
@@ -84,6 +87,8 @@ function Warehouse({ branches, onChange }) {
   if (!data) return <p>{message || 'Loading warehouse...'}</p>;
 
   const stock = data.stock;
+  const stockPages = Math.max(1, Math.ceil(stock.length / STOCK_PER_PAGE));
+  const currentStockPage = Math.min(stockPage, stockPages);
   const selectedOut = stock.find(p => String(p.product_id) === String(outForm.product_id));
   const totalUnits = stock.reduce((sum, p) => sum + Number(p.stock), 0);
   const totalTransit = stock.reduce((sum, p) => sum + Number(p.in_transit), 0);
@@ -227,7 +232,7 @@ function Warehouse({ branches, onChange }) {
           <tr><th>Product</th><th>Category</th><th>In warehouse</th><th>In transit</th></tr>
         </thead>
         <tbody>
-          {stock.map(p => (
+          {stock.slice((currentStockPage - 1) * STOCK_PER_PAGE, currentStockPage * STOCK_PER_PAGE).map(p => (
             <tr key={p.product_id}>
               <td>{p.name}</td>
               <td>{p.category}</td>
@@ -237,6 +242,7 @@ function Warehouse({ branches, onChange }) {
           ))}
         </tbody>
       </table>
+      <Pager page={currentStockPage} pages={stockPages} onChange={setStockPage} />
 
       <h3 className="wh-title">Factory receipts</h3>
       <table className="admin-table">

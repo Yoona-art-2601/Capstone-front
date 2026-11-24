@@ -3,7 +3,7 @@ import './App.css';
 import CustomerAuth from './CustomerAuth';
 import { Stars } from './Stars';
 import { SiteHeader, SiteFooter, WhatsAppButton } from './Layout';
-import ProductModal, { productImageUrl } from './ProductModal';
+import ProductModal, { productImageUrl, PromoNote } from './ProductModal';
 import { loadSavedBranch, saveBranch, loadSavedCart, saveCart, rebuildCart, savedCartCount } from './cartStorage';
 import { API, rm } from './api';
 
@@ -39,9 +39,14 @@ export function withPricing(product) {
   const price = Number(product.price);
   const sale = product.sale_price === null ? null : Number(product.sale_price);
   const onSale = sale !== null && sale < price;
+  const setSale = product.sale_price_set == null ? null : Number(product.sale_price_set);
+  const now = new Date();
+  const startsLater = !!product.sale_start && new Date(product.sale_start.replace(' ', 'T')) > now;
+  const endsLater = !product.sale_end || new Date(product.sale_end.replace(' ', 'T')) > now;
   return {
     ...product,
     on_sale: onSale,
+    upcoming_sale: !onSale && setSale !== null && setSale < price && startsLater && endsLater ? setSale : null,
     unit_price: onSale ? sale : price,
     discount_percent: onSale ? Math.round((1 - sale / price) * 100) : 0
   };
@@ -64,11 +69,6 @@ const SORTERS = {
   top_rated: (a, b) => (Number(b.avg_rating) || 0) - (Number(a.avg_rating) || 0) || Number(b.review_count) - Number(a.review_count) || byCategoryName(a, b)
 };
 
-function formatEnd(value) {
-  if (!value) return '';
-  const d = new Date(value.replace(' ', 'T'));
-  return d.toLocaleDateString('en-MY', { day: 'numeric', month: 'short' });
-}
 
 function Store() {
   const [branches, setBranches] = useState([]);
@@ -352,7 +352,7 @@ function Store() {
               <span className={'price' + (product.on_sale ? ' sale' : '')}>{rm(product.unit_price)}</span>
               {product.on_sale && <span className="price-old">{rm(product.price)}</span>}
             </span>
-            {product.on_sale && product.sale_end && <span className="promo-end">Promo ends {formatEnd(product.sale_end)}</span>}
+            <PromoNote product={product} />
             {product.stock <= 0 ? (
               hasAlert(product) ? (
                 <button className="btn btn-ghost" disabled>We'll notify you</button>
