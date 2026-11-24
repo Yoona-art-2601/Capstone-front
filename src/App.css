@@ -677,7 +677,8 @@ h3.clickable:hover { color: var(--green-700); text-decoration: underline; }
 .load-more { display: flex; justify-content: center; margin-top: 8px; }
 .notif-dot.shipment { background: #6772e5; }
 .auth-forgot { align-self: flex-end; margin-top: -4px; font-size: 13px; color: var(--green-700); font-weight: 700; }
-.cart-login { margin-top: 12px; }
+.cart-login { display: flex; width: fit-content; margin: 12px auto 0; }
+.cart-empty small { display: block; }
 
 .topbar-actions .btn, .account-link, .cart-button { white-space: nowrap; flex-shrink: 0; }
 .branch-picker { min-width: 0; flex: 0 1 auto; }
