@@ -292,14 +292,21 @@ function ProductRow({ product, branchId, canManage, onDone }) {
   );
 }
 
+const PRODUCTS_PER_PAGE = 6;
+
 function Inventory({ branchId, canManage = true, onChange }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [showAdd, setShowAdd] = useState(false);
+  const [page, setPage] = useState(1);
   const [newProduct, setNewProduct] = useState({
     name: '', category: '', price: '', initial_stock: '0', low_stock_threshold: '10'
   });
+
+  useEffect(() => {
+    setPage(1);
+  }, [branchId]);
 
   const loadProducts = useCallback((showSpinner = true) => {
     if (branchId === 'all') return;
@@ -359,6 +366,9 @@ function Inventory({ branchId, canManage = true, onChange }) {
 
   const lowCount = products.filter(p => Number(p.stock) <= Number(p.low_stock_threshold)).length;
   const categories = Array.from(new Set(products.map(p => p.category).filter(Boolean))).sort();
+  const pages = Math.max(1, Math.ceil(products.length / PRODUCTS_PER_PAGE));
+  const currentPage = Math.min(page, pages);
+  const pageProducts = products.slice((currentPage - 1) * PRODUCTS_PER_PAGE, currentPage * PRODUCTS_PER_PAGE);
 
   return (
     <div>
@@ -425,7 +435,7 @@ function Inventory({ branchId, canManage = true, onChange }) {
             {products.length === 0 && (
               <tr><td colSpan="8">No products.</td></tr>
             )}
-            {products.map(product => (
+            {pageProducts.map(product => (
               <ProductRow
                 key={product.product_id}
                 product={product}
@@ -436,6 +446,13 @@ function Inventory({ branchId, canManage = true, onChange }) {
             ))}
           </tbody>
         </table>
+      )}
+      {!loading && pages > 1 && (
+        <div className="pager">
+          <button disabled={currentPage <= 1} onClick={() => setPage(currentPage - 1)}>&larr; Prev</button>
+          <span>Page {currentPage} of {pages}</span>
+          <button disabled={currentPage >= pages} onClick={() => setPage(currentPage + 1)}>Next &rarr;</button>
+        </div>
       )}
     </div>
   );

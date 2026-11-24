@@ -27,11 +27,14 @@ function BarChart({ labels, values, label, color }) {
   return <canvas ref={canvasRef}></canvas>;
 }
 
+const LOW_STOCK_PER_PAGE = 10;
+
 function Dashboard({ branchId }) {
   const [days, setDays] = useState(7);
   const [summary, setSummary] = useState(null);
   const [dash, setDash] = useState(null);
   const [lowStock, setLowStock] = useState([]);
+  const [lowPage, setLowPage] = useState(1);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -50,7 +53,10 @@ function Dashboard({ branchId }) {
       .then(([s, d, l]) => {
         if (s.success) setSummary(s.data);
         if (d.success) setDash(d.data);
-        if (l.success) setLowStock(l.data);
+        if (l.success) {
+          setLowStock(l.data);
+          setLowPage(1);
+        }
       })
       .catch(err => {
         console.error(err);
@@ -62,6 +68,7 @@ function Dashboard({ branchId }) {
   const dailyValues = useMemo(() => (dash ? dash.daily_sales.map(r => Number(r.total)) : []), [dash]);
   const branchLabels = useMemo(() => (dash ? dash.sales_by_branch.map(r => r.branch_name) : []), [dash]);
   const branchValues = useMemo(() => (dash ? dash.sales_by_branch.map(r => Number(r.revenue)) : []), [dash]);
+  const lowPages = Math.max(1, Math.ceil(lowStock.length / LOW_STOCK_PER_PAGE));
 
   return (
     <div>
@@ -163,7 +170,7 @@ function Dashboard({ branchId }) {
             {lowStock.length === 0 && (
               <tr><td colSpan="4">No low-stock items.</td></tr>
             )}
-            {lowStock.map(item => (
+            {lowStock.slice((lowPage - 1) * LOW_STOCK_PER_PAGE, lowPage * LOW_STOCK_PER_PAGE).map(item => (
               <tr key={item.branch_id + '-' + item.product_id}>
                 <td>{item.branch_name}</td>
                 <td>{item.name}</td>
@@ -173,6 +180,13 @@ function Dashboard({ branchId }) {
             ))}
           </tbody>
         </table>
+        {lowPages > 1 && (
+          <div className="pager">
+            <button disabled={lowPage <= 1} onClick={() => setLowPage(lowPage - 1)}>&larr; Prev</button>
+            <span>Page {lowPage} of {lowPages} ({lowStock.length} items)</span>
+            <button disabled={lowPage >= lowPages} onClick={() => setLowPage(lowPage + 1)}>Next &rarr;</button>
+          </div>
+        )}
       </div>
     </div>
   );

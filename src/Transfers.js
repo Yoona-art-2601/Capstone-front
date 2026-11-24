@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { API } from './api';
 import { formatDateTime } from './format';
 
+const TRANSFERS_PER_PAGE = 10;
+
 function Transfers({ branchId, onChange }) {
   const [branches, setBranches] = useState([]);
   const [fromBranch, setFromBranch] = useState('');
@@ -11,6 +13,7 @@ function Transfers({ branchId, onChange }) {
   const [qty, setQty] = useState('');
   const [message, setMessage] = useState('');
   const [transfers, setTransfers] = useState([]);
+  const [page, setPage] = useState(1);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -49,7 +52,10 @@ function Transfers({ branchId, onChange }) {
     fetch(API + '/stock/get_transfers.php' + query, { credentials: 'include' })
       .then(res => res.json())
       .then(result => {
-        if (result.success) setTransfers(result.data);
+        if (result.success) {
+          setTransfers(result.data);
+          setPage(1);
+        }
       })
       .catch(err => console.error('Error fetching transfers:', err));
   }, [branchId]);
@@ -121,6 +127,8 @@ function Transfers({ branchId, onChange }) {
     setSubmitting(false);
   };
 
+  const pages = Math.max(1, Math.ceil(transfers.length / TRANSFERS_PER_PAGE));
+
   return (
     <div>
       <div className="form-box">
@@ -185,7 +193,7 @@ function Transfers({ branchId, onChange }) {
           {transfers.length === 0 && (
             <tr><td colSpan="5">No transfers yet.</td></tr>
           )}
-          {transfers.map(t => (
+          {transfers.slice((page - 1) * TRANSFERS_PER_PAGE, page * TRANSFERS_PER_PAGE).map(t => (
             <tr key={t.transfer_id}>
               <td className="nowrap">{formatDateTime(t.transfer_date)}</td>
               <td>{t.name}</td>
@@ -196,6 +204,13 @@ function Transfers({ branchId, onChange }) {
           ))}
         </tbody>
       </table>
+      {pages > 1 && (
+        <div className="pager">
+          <button disabled={page <= 1} onClick={() => setPage(page - 1)}>&larr; Prev</button>
+          <span>Page {page} of {pages}</span>
+          <button disabled={page >= pages} onClick={() => setPage(page + 1)}>Next &rarr;</button>
+        </div>
+      )}
     </div>
   );
 }
